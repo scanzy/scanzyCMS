@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# uncomment to rewrite url only in case it does NOT represent a file
+# RewriteCond %{REQUEST_FILENAME} !-f
+
+# ignore this extensions
+RewriteCond %{REQUEST_URI} !.*\.(css|jpg|gif|zip|js|json|png|bmp)
+
+RewriteBase /
+RewriteRule ^(.*)$ index.php?url=$1 [QSA]
+
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
