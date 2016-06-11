@@ -13,8 +13,9 @@ if (isset($_REQUEST['action']))
     $dberrorcallback = function($msg) { die2(500, $msg); };
     $paramserrorcallback = function($msg) { die2(400, $msg); };
 
-    //checks setup action
+    //checks setup/logout action
     if ($_REQUEST['action'] == "setup") db_setup($dberrorcallback);
+    if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
 
     //gets helper object
     $helper = getHelper($_REQUEST['request']);
@@ -352,6 +353,7 @@ if (!alreadyLogged()) redirect("./login.php");
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
         <link rel="stylesheet" type="text/css" href="style.css" />
     </head>
@@ -368,9 +370,9 @@ if (!alreadyLogged()) redirect("./login.php");
             <div class="collapse navbar-collapse" id="topbarcontent">
                 <ul class="nav">
                     <li>
-                        <a href="#">Dashboard</a>
+                        <a href="#" class="hover" onclick="showMsg('ciao');">Dashboard</a>
                     </li><li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" onclick="showError('ciao');">
                             Files
                             <span class="caret"></span>
                         </a>
@@ -379,7 +381,7 @@ if (!alreadyLogged()) redirect("./login.php");
                             <li><a href="#">View list</a></li>
                         </ul>
                     </li><li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" onclick="showInfo('ciao');">
                             Contents
                             <span class="caret"></span>
                         </a>
@@ -387,8 +389,8 @@ if (!alreadyLogged()) redirect("./login.php");
                             <li><a href="#">New content</a></li>
                             <li><a href="#">View list</a></li>
                         </ul>
-                    </li><li><a href="#">Settings</a>
-                    </li><li><a href="#">Logout</a></li>
+                    </li><li><a href="#" onclick="showWarning('ciao');">Settings</a>
+                    </li><li><a href="#" onclick="logout();">Logout</a></li>
                 </ul>
             </div>
         </nav>
@@ -413,5 +415,11 @@ if (!alreadyLogged()) redirect("./login.php");
         <div id="footer">
             <span>Powered by <b>ScanzySoftware</b></span>
         </div>
+        <script src="messages.js"></script>
+        <script>
+            function ajax(data, done) { $.post("./", data).done(function() {if (done != undefined) done(); }).fail(function (e) { alert(e); }); }
+
+            function logout() { ajax({ action: 'logout' }, function() { window.location = "./login.php" }); }
+        </script>
     </body>
 </html>
