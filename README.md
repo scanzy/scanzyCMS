@@ -1,10 +1,10 @@
 # scanzyCMS
-## Macro substitutions based CMS
+Macro substitutions based CMS
 
-Note: The project is currently in development
+##### Note: The project is currently in development
 
 ScanzyCMS is a web content management system, suitable for dynamic websites. 
-It is based on macros replacements, defined with html elements within the page(eg. <macro>macroname</macro>).
+It is based on macros replacements, defined with html elements within the page(eg. &lt;macro&gt;macroname&lt;/macro&gt;).
 
 ### Requirements
 
@@ -12,7 +12,7 @@ It is based on macros replacements, defined with html elements within the page(e
 * PHP 5.4 or higher
 * MySQL database
 
-If you want to use MsSql you only have to change the setup query (change foreign keys suff)
+If you want to use MsSql you only have to change the setup query (change foreign keys stuff)
 
 ### Getting started
 
