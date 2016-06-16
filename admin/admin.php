@@ -1,7 +1,36 @@
 <?php
 
-//includes info about db and misc functions
+//includes misc functions (db connection, conf loading, ecc)
 require_once '../shared.php';
+
+//----------------------------------------------------------------------------------------------
+//AUTHENTICATION
+
+//checks if there was login
+function alreadyLogged()
+{  
+    //if no data from session
+    return isset($_SESSION['username']);    
+}
+
+//loads users in $_SESSION['scanzycms-users'] reading from users.ini
+function loadUsers()
+{
+    $_SESSION['scanzycms-users'] = parse_ini_file(USERS_FILE, TRUE); //gets data
+    if ($_SESSION['scanzycms-users'] == FALSE) 
+        die2(500, "Error while parsing users data");
+    return $_SESSION['scanzycms-users'];
+}
+
+//writes configuration in $_SESSION['scanzycms-users'] to users.ini file
+function saveUsers()
+{
+    if(write_ini_file(USERS_FILE, $_SESSION['scanzycms-users'], TRUE) == FALSE)
+        die2("Error while saving users data");
+}
+
+//-------------------------------------------------------------------------------------------
+//AJAX MODE
 
 //if ajax request (perform action)
 if (isset($_REQUEST['action']))
@@ -15,7 +44,7 @@ if (isset($_REQUEST['action']))
         //check parameters
         if (!isset($_POST['username']) || !isset($_POST['password']))
             die2(400, "Required username and password params");
-
+        
         $users = loadUsers(); //loads users data
 
         //checks if finds user
@@ -27,7 +56,7 @@ if (isset($_REQUEST['action']))
                 //checks password
                 if ($usergroup[$_POST['username']] == $_POST['password']) 
                 {
-                    session_start(); //saves username and usertype
+                    //saves username and usertype
                     $_SESSION['username'] = $_POST['username'];
                     $_SESSION['usertype'] = $type;
 
@@ -359,37 +388,6 @@ function db_setup($errorcallback)
     try { $conn->exec($sql); } 
     catch(PDOException $e) { $errorcallback("SQL error: ".$e->getMessage()); }
     exit();
-}
-
-//----------------------------------------------------------------------------------------------
-//AUTHENTICATION
-
-//checks if there was login
-function alreadyLogged()
-{  
-    //if no data from session
-    session_start();
-    return isset($_SESSION['username']);    
-}
-
-//loads users in $_SESSION['scanzycms-users'] reading from users.ini
-function loadUsers()
-{
-    session_start();
-    if (!isset($_SESSION['scanzycms-users'])) 
-    {
-        $_SESSION['scanzycms-users'] = parse_ini_file(USERS_FILE, TRUE); //gets data
-        if ($_SESSION['scanzycms-users'] == FALSE) die2(500, "Error while parsing users data");
-    }
-    return $_SESSION['scanzycms-users'];
-}
-
-//writes configuration in $_SESSION['scanzycms-users'] to users.ini file
-function saveUsers()
-{
-    session_start();
-    if(write_ini_file(USERS_FILE, $_SESSION['scanzycms-users'], TRUE) == FALSE)
-        die2("Error while saving users data");
 }
 
 //----------------------------------------------------------------------------------------------

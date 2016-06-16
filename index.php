@@ -1,6 +1,6 @@
 <?php
     
-//includes info about db and function to connect
+//includes misc functions (db connection, conf loading, ecc)
 require_once './shared.php';
 
 //sets error mode html

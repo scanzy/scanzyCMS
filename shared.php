@@ -3,8 +3,8 @@
 //used to store public functions used by various other php files
 //use: require_once './shared.php' or require_once '../shared.php' (depending on your php file directory)
 
-define("CONFIG_FILE", "./config.ini");
-define("USERS_FILE", "./admin/users.ini");
+define("CONFIG_FILE", "config.ini");
+define("USERS_FILE", "users.ini");
 
 //----------------------------------------------------------------------------------------------
 //ERROR HANDLING
@@ -46,10 +46,11 @@ function die2($code, $msg = "")
 //------------------------------------------------------------------------------------------------
 //CONFIGURATION
 
+session_start();
+
 //loads configuration in $_SESSION['scanzycms-config'] reading from config.ini
 function loadConfig()
 {
-    session_start();
     if (!isset($_SESSION['scanzycms-config'])) 
     {
         $_SESSION['scanzycms-config'] = parse_ini_file(CONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
@@ -61,7 +62,6 @@ function loadConfig()
 //writes configuration in $_SESSION['scanzycms-config'] to config.ini file
 function setConfig()
 {
-    session_start();
     if(write_ini_file(CONFIG_FILE, $_SESSION['scanzycms-config'], TRUE, INI_SCANNER_TYPED) == FALSE)
         die2("Error while saving configuration");
 }
@@ -148,6 +148,6 @@ function echofile($path, $search = "", $replace = "")
 }
 
 //redirects to some page
-function redirect($url){ echo "<script>window.location = '".$url."'</script>"; exit(); 
+function redirect($url){ echo "<script>window.location = '".$url."'</script>"; exit(); }
 
 ?>
