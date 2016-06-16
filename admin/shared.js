@@ -17,7 +17,7 @@ function ajax(data, callback) {
 }
 
 //logout button
-$("#logout").click(function () { ajax({ action: 'logout' }, function () { window.location = "./login.php" }); });
+$("#logout").click(function () { ajax({ action: 'logout' }, function () { window.location = "./login.html" }); });
 
 //$("#topbarcontent").removeClass('in'); //collapses nav (if mobile mode)
 

@@ -3,8 +3,8 @@
 //used to store public functions used by various other php files
 //use: require_once './shared.php' or require_once '../shared.php' (depending on your php file directory)
 
-define("CONFIG_FILE", "config.ini");
-define("USERS_FILE", "users.ini");
+define("CONFIG_FILE", "./config.ini");
+define("USERS_FILE", "./admin/users.ini");
 
 //----------------------------------------------------------------------------------------------
 //ERROR HANDLING
@@ -26,11 +26,15 @@ function die2($code, $msg = "")
     switch (getErrMode()) 
     {
         case ERR_MODE_HTML: //html handler (html page)
-            if (isset($_SESSION['scanzycms-config']['Errors'][$code]))
+            
+            //only if specified in config
+            $conf = loadConfig();
+            if (isset($conf['Errors'])) 
+                if (isset($conf[$code])) 
             {
                 setErrMode(ERR_MODE_AJAX); //to prevent infinite loop on errors
                 header("X-error-msg: ".$msg); //send message as header
-                echofile($_SESSION['scanzycms-config']['Errors'][$code]);                
+                echofile($conf['Errors'][$code]);                
             }      
             break;    
         
@@ -48,7 +52,7 @@ function loadConfig()
     session_start();
     if (!isset($_SESSION['scanzycms-config'])) 
     {
-        $_SESSION['scanzycms-config'] = parse_ini_file(__DIR__.'\\'.ONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
+        $_SESSION['scanzycms-config'] = parse_ini_file(CONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
         if ($_SESSION['scanzycms-config'] == FALSE) die2(500, "Error while parsing configuration");
     }
     return $_SESSION['scanzycms-config'];
@@ -58,7 +62,7 @@ function loadConfig()
 function setConfig()
 {
     session_start();
-    if(write_ini_file(__DIR__.'\\'.CONFIG_FILE, $_SESSION['scanzycms-config'], TRUE, INI_SCANNER_TYPED) == FALSE)
+    if(write_ini_file(CONFIG_FILE, $_SESSION['scanzycms-config'], TRUE, INI_SCANNER_TYPED) == FALSE)
         die2("Error while saving configuration");
 }
 
@@ -114,13 +118,13 @@ function connect()
     if (isset($GLOBALS['scanzycms-conn'])) return $GLOBALS['scanzycms-conn'];
 
     //reads configuration from config.ini if needed
-    loadConfig();
+    $conf = loadConfig();
 
     //connects to database
-    $GLOBALS['scanzycms-conn'] = new PDO("mysql:host=".$_SESSION['scanzycms-config']['DB']['host'].";dbname=".
-        $_SESSION['scanzycms-config']['DB']['name'], 
-        $_SESSION['scanzycms-config']['DB']['user'],
-        $_SESSION['scanzycms-config']['DB']['pwd']);
+    $GLOBALS['scanzycms-conn'] = new PDO("mysql:host=".$conf['DB']['host'].";dbname=".
+        $conf['DB']['name'], 
+        $conf['DB']['user'], 
+        $conf['DB']['pwd']);
 
     $GLOBALS['scanzycms-conn']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     return $GLOBALS['scanzycms-conn'];      
@@ -144,17 +148,6 @@ function echofile($path, $search = "", $replace = "")
 }
 
 //redirects to some page
-function redirect($url){ echo "<script>window.location = '".$url."'</script>"; exit(); }
-
-//----------------------------------------------------------------------------------------------
-//AUTHENTICATION
-
-//checks if there was login
-function alreadyLogged()
-{  
-    //if no data from session
-    session_start();
-    return isset($_SESSION['username']);    
-}
+function redirect($url){ echo "<script>window.location = '".$url."'</script>"; exit(); 
 
 ?>
