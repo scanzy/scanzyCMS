@@ -18,7 +18,7 @@ if (isset($_REQUEST['action']))
     if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
 
     //gets helper object
-    $helper = getHelper($_REQUEST['request']);
+    $helper = getHelper($_REQUEST['request'], $paramserrorcallback, $dberrorcallback);
     
     //selects action type
     switch($_REQUEST['action'])
@@ -31,7 +31,7 @@ if (isset($_REQUEST['action']))
         case "edit": $helper->editItem2(); touch(FILE_TOUCH); break;
 
         //deletes item and related elements
-        case "del": $helper->delItem2(); 
+        case "del": $helper->delItem2(); touch(FILE_TOUCH);
 
             //deletes related items
             switch($_REQUEST['request'])
@@ -59,7 +59,7 @@ if (isset($_REQUEST['action']))
                     
                     break;
             }
-            touch(FILE_TOUCH); break;
+            break;
         
         //error
         default: die2(400, "Unknown action"); break;
@@ -77,95 +77,80 @@ function sendJSON($obj)
 }
 
 //gets db helper for type specified
-function getHelper($type)
+function getHelper($type, $paramserrorcallback, $dberrorcallback)
 {
+    $helper = new DBhelper($paramserrorcallback, $dberrorcallback); // callbacks
+
     //selects request type
     switch($type)
     {
-        case "content": 
-
-            return new DBhelper("Content", // table name
-                array("id" => "Id"), // required where params 
-                array("parentid" => "ParentId"), // optional where params
-                array("text" => "Text", "parentid" => "ParentId"), // required insert params
-                array("name" => "Name"), // optional insert params
-                $paramserrorcallback, $dberrorcallback); // callbacks
-                break; 
+        case "content":             
+            $helper->tablename = "Contents"; // table name
+            $helper->requiredwhereparams = array("id" => "Id"); // required where params 
+            $helper->optionalwhereparams = array("parentid" => "ParentId"); // optional where params
+            $helper->requiredparams = array("text" => "Text", "parentid" => "ParentId"); // required insert params
+            $helper->optionalparams = array("name" => "Name"); // optional insert params
+            break; 
 
         case "substitution":
-
-            return new DBhelper("Substitutions", // table name
-                array("searchid" => "SearchId", "macro" => "Macro"), // required where params 
-                array("replaceid" => "ReplaceId", "index" => "OrderIndex"), // optional where params
-                array("searchid" => "SearchId", "macro" => "Macro", "replaceid" => "ReplaceId"), // required insert params
-                array("index" => "OrderIndex"), // optional insert params
-                $paramserrorcallback, $dberrorcallback); // callbacks
-                break; 
+            $helper->tablename = "Substitutions"; // table name
+            $helper->requiredwhereparams = array("searchid" => "SearchId", "macro" => "Macro"); // required where params 
+            $helper->optionalwhereparams = array("replaceid" => "ReplaceId", "index" => "OrderIndex"); // optional where params
+            $helper->requiredparams = array("searchid" => "SearchId", "macro" => "Macro", "replaceid" => "ReplaceId"); // required insert params
+            $helper->optionalparams = array("index" => "OrderIndex"); // optional insert params
+            break; 
 
         case "file":
+            $helper->tablename = "Files"; // table name
+            $helper->requiredwhereparams = array("url" => "Url"); // required where params 
+            $helper->optionalwhereparams = array("contentid" => "ContentId"); // optional where params
+            $helper->requiredparams = array("url" => "Url", "contentid" => "ContentId"); // required insert params
+            break; 
 
-            return new DBhelper("Files", // table name
-                array("url" => "Url"), // required where params 
-                array("contentid" => "ContentId"), // optional where params
-                array("url" => "Url", "contentid" => "ContentId"), // required insert params
-                array(), // optional insert params
-                $paramserrorcallback, $dberrorcallback); // callbacks
-                break; 
-
-        case "tag":
-            
-            return new DBhelper("Tags", // table name
-                array("id" => "Id"), // required where params 
-                array(), // optional where params
-                array("tag" => "Tag"), // required insert params
-                array(), // optional insert params
-                $paramserrorcallback, $dberrorcallback); // callbacks
-                break; 
+        case "tag":            
+            $helper->tablename = "Tags"; // table name
+            $helper->requiredwhereparams = array("id" => "Id"); // required where params 
+            $helper->requiredparams = array("tag" => "Tag"); // required insert params
+            break; 
 
         case "contenttag":
-
-            return new DBhelper("ContentTags", // table name
-                array("tagid" => "TagId", "contentid" => "ContentId"), // required where params 
-                array(), // optional where params
-                array("tagid" => "TagId", "contentid" => "ContentId"), // required insert params
-                array(), // optional insert params
-                $paramserrorcallback, $dberrorcallback); // callbacks
-                break; 
+            $helper->tablename = "ContentTags"; // table name
+            $helper->requiredwhereparams = array("tagid" => "TagId", "contentid" => "ContentId"); // required where params 
+            $helper->requiredparams = array("tagid" => "TagId", "contentid" => "ContentId"); // required insert params
+            break; 
 
         case "macrotag":
+            $helper->tablename = "MacroTags"; // table name
+            $helper->requiredwhereparams = array("tagid" => "TagId", "contentid" => "ContentId", "macro" => "Macro"); // required where params 
+            $helper->requiredparams = array("tagid" => "TagId", "contentid" => "ContentId", "macro" => "Macro"); // required insert params
+            break; 
 
-            return new DBhelper("MacroTags", // table name
-                array("tagid" => "TagId", "contentid" => "ContentId", "macro" => "Macro"), // required where params 
-                array(), // optional where params
-                array("tagid" => "TagId", "contentid" => "ContentId", "macro" => "Macro"), // required insert params
-                array(), // optional insert params
-                $paramserrorcallback, $dberrorcallback); // callbacks
-                break; 
-
-        default: die2(400, "Unknown request"); break;
+        default: $paramserrorcallback("Unknown request"); return NULL; break;
     }
+    return $helper;
 }
 
 //class to easily manage database rows using request data
 class DBhelper
 {
-    //saves data into object (for easier later access)
-    public function __construct($tablename, $requiredwhereparams, $optionalwhereparams, $requiredparams, $optionalparams, $paramserrorcallback, $dberrorcallback)
+    //saves callbacks into object (for easier later access)
+    public function __construct($paramserrorcallback, $dberrorcallback)
     {
-        $this->tablename = $tablename;
-        $this->requiredwhereparams = $requiredwhereparams;
-        $this->optionalwhereparams = $optionalwhereparams;
-        $this->requiredparams = $requiredparams;
-        $this->optionalparams = $optionalparams;
         $this->paramserrorcallback = $paramserrorcallback;
         $this->dberrorcallback = $dberrorcallback;
     }
 
+    public $tablename = "";
+    public $requiredwhereparams = array();
+    public $optionalwhereparams = array();
+    public $requiredparams = array();
+    public $optionalparams = array();
+    
     //non-static versions of public function below
     public function newItem2() { return self::newItem($this->tablename, $this->requiredparams, $this->optionalparams, $this->paramserrorcallback, $this->dberrorcallback); }
     public function editItem2() { return self::editItem($this->tablename, $this->requiredwhereparams, $this->optionalwhereparams, $this->optionalparams, $this->paramserrorcallback, $this->dberrorcallback); }
     public function delItem2() { return self::delItem($this->tablename, $this->requiredwhereparams, $this->optionalwhereparams, $this->paramserrorcallback, $this->dberrorcallback); }
-    public function getItems2($select = "*", $orderbysql = "") { return self::getItems($this->tablename, $select, $this->optionalwhereparams, $this->paramserrorcallback, $this->dberrorcallback, $orderbysql); }
+    public function getItems2($select = "*") { return self::getItems($this->tablename, $select, $this->optionalwhereparams, $this->paramserrorcallback, $this->dberrorcallback); }
     
     //creates a new item, reading data from request
     public static function newItem($tablename, $requiredparams, $optionalparams, $paramserrorcallback, $dberrorcallback)
@@ -175,8 +160,8 @@ class DBhelper
 
         //builds sql
         $cols = $vals = "(";
-        foreach($requiredparams as $p => $c) { $cols .= $c.", "; $vals .= ":".$c.", "; }
-        foreach($optionalparams as $p => $c) if (isset($_REQUEST[$p])) { $cols .= $c.", "; $vals .= ":".$c.", "; }
+        foreach($requiredparams as $p => $c) { $cols .= $c.", "; $vals .= ":".strtolower($c).", "; }
+        foreach($optionalparams as $p => $c) if (isset($_REQUEST[$p])) { $cols .= $c.", "; $vals .= ":".strtolower($c).", "; }
 
         //removes last ", " and appends ")";
         $cols = substr($cols, 0, -2).")";
@@ -195,14 +180,14 @@ class DBhelper
 
         //builds sql
         $sql = "UPDATE FROM ".$tablename." SET  ";
-        foreach($requiredparams as $p => $c) $sql.= $c."=:".$c.", ";
-        foreach($optionalparams as $p => $c) if (isset($_REQUEST[$p])) $sql.= $c."=:".$c.", ";
+        foreach($requiredparams as $p => $c) $sql.= $c."=:".strtolower($c).", ";
+        foreach($optionalparams as $p => $c) if (isset($_REQUEST[$p])) $sql.= $c."=:".strtolower($c).", ";
 
         //removes last ", "
         $sql = substr($sql, 0, -2);
 
         //adds where
-        $sql .= " ".self::buildWhereSql($requiredwhereparams, $optionalwhereparams).";";
+        $sql .= self::buildWhereSql($requiredwhereparams, $optionalwhereparams).";";
 
         //performs query
         return self::performQuery($sql, $requiredwhereparams, array_merge($optionalparams, $optionalwhereparams), $dberrorcallback);
@@ -215,17 +200,17 @@ class DBhelper
         if (self::checkParams($requiredwhereparams, $paramserrorcallback) == FALSE) return FALSE;
 
         //builds sql
-        $sql = "DELETE FROM ".$tablename." ".self::buildWhereSql($requiredwhereparams, $optionalwhereparams).";";
+        $sql = "DELETE FROM ".$tablename.self::buildWhereSql($requiredwhereparams, $optionalwhereparams).";";
 
         //performs query
         return self::performQuery($sql, $requiredwhereparams, $optionalwhereparams, $dberrorcallback);
     }
 
     //gets item info, reading data from request
-    public static function getItems($tablename, $select, $optionalwhereparams, $paramserrorcallback, $dberrorcallback, $orderbysql = "")
+    public static function getItems($tablename, $select, $optionalwhereparams, $paramserrorcallback, $dberrorcallback)
     {
         //builds sql
-        $sql = "SELECT ".$select." FROM ".$tablename." ".self::buildWhereSql(array(), $optionalwhereparams)." ".$orderbysql.";";
+        $sql = "SELECT ".$select." FROM ".$tablename.self::buildWhereSql(array(), $optionalwhereparams).";";
 
         //performs query
         return self::performQuery($sql, array(), $optionalwhereparams, $dberrorcallback);
@@ -244,20 +229,20 @@ class DBhelper
     static function buildWhereSql($requiredwhereparams, $optionalwhereparams)
     {
         //no query if no where params
-        if (count($requiredwhereparams) + count($optionalwhereparams) <= 0) return "";
+        if (count($requiredwhereparams) + count($optionalwhereparams) == 0) return "";
 
-        $where = "WHERE ";
+        $where = " WHERE ";
          
         //required params
-        foreach($requiredwhereparams as $p => $c) 
-            $where.=$c."=:".$c." AND "; 
+        foreach($requiredwhereparams as $p => $c)
+            $where .= $c."=:".strtolower($c)." AND "; 
 
         //optional params
-        foreach($optionalparams as $p => $c) 
-            if (isset($_REQUEST[$p])) $where.=$c."=:".$c." AND "; 
+        foreach($optionalwhereparams as $p => $c) 
+            if (isset($_REQUEST[$p])) $where .= $c."=:".strtolower($c)." AND "; 
 
         //returns string without last " AND "
-        return substr($where, 0 -5);
+        return ($where != " WHERE ") ? substr($where, 0, -5) : "";
     }
 
     //performs query binding params
@@ -275,10 +260,10 @@ class DBhelper
             foreach($optionalparams as $p => $c) if (isset($_REQUEST[$p])) $bindparams[$c] = $_REQUEST[$p];
 
             //binds params
-            foreach($bindparams as $c => $val) $stmt->bindParam(":".$c, $v);
+            foreach($bindparams as $c => $val) $stmt->bindParam(":".strtolower($c), $val);
             
             $stmt->execute(); //executes query 
-            return $stmt->fetch(PDO::FETCH_ASSOC); //and returns result
+            return (substr($sql, 0, 6) == "SELECT") ? $stmt->fetchAll(PDO::FETCH_ASSOC) : $stmt->rowCount(); //and returns result
 
         } //handles pdo errors
         catch(PDOException $e) { $errorcallback($e->GetMessage()); return FALSE; }
@@ -370,9 +355,9 @@ if (!alreadyLogged()) redirect("./login.php");
             <div class="collapse navbar-collapse" id="topbarcontent">
                 <ul class="nav">
                     <li>
-                        <a href="#" class="hover" onclick="showMsg('ciao');">Dashboard</a>
-                    </li><li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" onclick="showError('ciao');">
+                        <a href="#dashboard"><span>Dashboard</span></a>
+                    </li><!--<li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             Files
                             <span class="caret"></span>
                         </a>
@@ -380,17 +365,13 @@ if (!alreadyLogged()) redirect("./login.php");
                             <li><a href="#">New file</a></li>
                             <li><a href="#">View list</a></li>
                         </ul>
-                    </li><li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" onclick="showInfo('ciao');">
-                            Contents
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">New content</a></li>
-                            <li><a href="#">View list</a></li>
-                        </ul>
-                    </li><li><a href="#" onclick="showWarning('ciao');">Settings</a>
-                    </li><li><a href="#" onclick="logout();">Logout</a></li>
+                    </li>-->
+                    </li><li><a href="#files">Files</a>
+                    </li><li><a href="#templates">Templates</a>
+                    </li><li><a href="#settings">Settings</a>
+                    </li><li class="right"><a href="#" id="logout">Logout</a>
+                    </li><li class="right"><a href="#help">Help</a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -403,7 +384,7 @@ if (!alreadyLogged()) redirect("./login.php");
             </div>
         </div>
 
-        <div class="container">
+        <div data-hash="dashboard" class="container page">
             <div class="box title"><h1>Dashboard</h1></div>
 
             <div class="box">
@@ -412,14 +393,183 @@ if (!alreadyLogged()) redirect("./login.php");
             </div>
         </div>
 
+        <div data-hash="files" class="container page">
+            <div class="box title"><h1>Files</h1></div>
+
+            <div class="box"><div id="files-list"></div></div>
+        </div>
+
+        <div data-hash="templates" class="container page">
+            <div class="box title"><h1>Templates</h1></div>
+
+            <div class="box"><div id="contents-list"></div></div>
+        </div>
+
+        <div data-hash="macros" class="container page">
+            <div class="box title"><h1>Macros</h1></div>
+
+            <div class="box"><div id="macros-list"></div></div>
+        </div>
+
+        <div data-hash="settings" class="container page">
+            <div class="box title"><h1>Settings</h1></div>
+            
+            <div class="row noselect">
+                <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
+                    <h2>Database connection</h2>
+                    <form id="db-conn" class="box" role="form">
+                        <div class="form-group">
+                            <label for="host">Host:</label>
+                            <input type="text" class="form-control" id="host">
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Database name:</label>
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Username:</label>
+                            <input type="text" class="form-control" id="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" class="form-control" id="password">
+                        </div>
+                        <p class="center" style="height: 2em">
+                            <span id="db-test-error" class="label label-danger hidden">Connection failed</span>
+                            <span id="db-test-ok" class="label label-info hidden">Connection OK</span>
+                            <span id="db-save-error" class="label label-danger hidden">Error while saving new configuration</span>
+                            <span id="db-save-ok" class="label label-success hidden">New configuration saved</span>
+                        </p>
+                        <button id="db-save" type="submit" class="btn btn-success disabled">Save</button>
+                        <button id="db-cancel" type="submit" class="btn btn-default disabled">Cancel</button>
+                        <button id="db-test" type="submit" class="btn btn-info">Test connection</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div id="footer">
             <span>Powered by <b>ScanzySoftware</b></span>
-        </div>
-        <script src="messages.js"></script>
-        <script>
-            function ajax(data, done) { $.post("./", data).done(function() {if (done != undefined) done(); }).fail(function (e) { alert(e); }); }
+        </div>  
 
-            function logout() { ajax({ action: 'logout' }, function() { window.location = "./login.php" }); }
+        <script src="translate.js"></script>
+        <script src="messages.js"></script>
+        <script src="confirm.js"></script>
+        <script src="scanzytable.js"></script>
+        <script>
+            function GetParam(p) { //gets GET param from url                
+                var params = window.location.search.substring(1).split('&');
+                for (var i = 0; i < params.length; i++)
+                    if (p == params[i].split('=')[0])
+                        return params[i].split('=')[1];
+            }
+
+            function errorPopup(xhr, text, error) { showError("<strong>" + xhr.status + " " + error + ":</strong> " + xhr.responseText); }
+            function ajax(data, callback) { //sends ajax post request showing popup on error
+                return $.post("./", data, function (data) { if (callback != undefined) callback(data); }).fail(errorPopup);
+            }
+
+            //logout button
+            $("#logout").click(function () { ajax({ action: 'logout' }, function () { window.location = "./login.php" }); });
+
+            //inits files table
+            filestable = $("#files-list").scanzytable({
+                search_placeholder: "Search files...",
+                new_text: "New file", new_click: function () { showError("Not implemented "); },
+                columns_names: ["File path (URL)", "File content", ""],
+                request: {
+                    url: "./", method: "GET", data: { request: "file", action: "get" },
+                    check_empty: function (data) { return (data.length == 0); },
+                    fetch: function (data) {
+                        var html = "";
+                        for (var i = 0; i < data.length; i++)
+                            html += '<tr><td><a href="../' + data[i]['Url'] + '" target="_blank">/' + data[i]['Url'] + '</a></td><td>' +
+                        data[i]['ContentId'] + '</td><td class="right"><button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' +
+                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-eye-open"></span> <span>View</span></button> <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' +
+                        data[i]['ContentId'] + ');"><span class="glyphicon glyphicon-edit"></span> <span>Edit</span></button> <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' +
+                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-trash"></span> <span>Delete</span></button></td></tr>';
+                        return html;
+                    },
+                    done: function () { translate(document.getElementById("files-list")); }, error: errorPopup
+                }
+            });
+
+            //inits contents table
+            contentstable = $("#contents-list").scanzytable({
+                search_placeholder: "Search contents...",
+                new_text: "New content", new_click: function () { showError("Not implemented "); },
+                columns_names: ["#", "Name", "Macros", ""],
+                request: {
+                    url: "./", method: "GET", data: { request: "content", action: "get" },
+                    check_empty: function (data) { return (data.length == 0); },
+                    fetch: function (data) {
+                        var html = "";
+                        for (var i = 0; i < data.length; i++)
+                            html += '<tr><td><a href="../' + data[i]['Id'] + '" target="_blank">/' + data[i]['Name'] + '</a></td><td>' +
+                        data[i]['Id'] + '</td><td class="right"><button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' +
+                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-eye-open"></span> <span>View</span></button> <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' +
+                        data[i]['Id'] + ');"><span class="glyphicon glyphicon-edit"></span> <span>Edit</span></button> <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' +
+                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-trash"></span> <span>Delete</span></button></td></tr>';
+                        return html;
+                    },
+                    done: function () { translate(document.getElementById("contents-list")); }, error: errorPopup
+                }
+            });
+
+            //inits macros table
+            macrostable = $("#macros-list").scanzytable({
+                search_placeholder: "Search macros...",
+                new_text: "New content", new_click: function () { showError("Not implemented "); },
+                columns_names: ["#", "Macro Name", "Macros", ""],
+                request: {
+                    url: "./", method: "GET", data: { request: "substitution", action: "get" },
+                    check_empty: function (data) { return (data.length == 0); },
+                    fetch: function (data) {
+                        var html = "";
+                        for (var i = 0; i < data.length; i++)
+                            html += '<tr><td><a href="../' + data[i]['Id'] + '" target="_blank">/' + data[i]['Name'] + '</a></td><td>' +
+                        data[i]['Id'] + '</td><td class="right"><button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' +
+                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-eye-open"></span> <span>View</span></button> <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' +
+                        data[i]['Id'] + ');"><span class="glyphicon glyphicon-edit"></span> <span>Edit</span></button> <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' +
+                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-trash"></span> <span>Delete</span></button></td></tr>';
+                        return html;
+                    },
+                    done: function () { translate(document.getElementById("contents-list")); }, error: errorPopup
+                }
+            });
+
+            //navigation
+            showPageFromHash = function () {
+                $(".page").each(function () //shows or hides pages elements
+                { $(this).attr('data-hash') == window.location.hash.substr(1) ? $(this).show() : $(this).hide(); });
+
+                $("#topbarcontent").removeClass('in'); //collapses nav (if mobile mode)
+
+                $("a").each(function () //highlights navigation buttons elements
+                { $(this).attr('href') == window.location.hash ? $(this).addClass("active") : $(this).removeClass("active"); });
+
+                switch (window.location.hash) {
+                    case "#files": filestable.loadItems(); break;
+                    case "#contents": contentstable.loadItems(); break;
+                    case "#macros": macrostable.loadItems({ searchid: GetParam("searchid") });
+                }
+            }
+
+            //pages navigation setup
+            $(window).on('hashchange', showPageFromHash);
+            if (window.location.hash == "") window.location.hash = "#dashboard";
+            showPageFromHash();
+
+            function confirmDelFile(url) {
+                showConfirm("<p><span>Do you really want to delete this file?</span> (URL '/" + url + "')</p>", function (x) {
+                    if (x == true) ajax({ action: 'del', request: 'file', url: url },
+                function () { filestable.loadItems(); });
+                });
+            }
+
+            function editContent(id) {
+                showError("Not implemented " + id);
+            }
         </script>
     </body>
 </html>

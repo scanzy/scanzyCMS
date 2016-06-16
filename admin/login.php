@@ -45,9 +45,6 @@ if (isset($_POST['username']) && isset($_POST['password']))
         <div id="header" class="center container noselect">
             <h1 class="inline">scanzyCMS</h1>
             <h3 class="inline">admin</h3>
-            <div class="inline">
-                <!--img width="220" src="logo.png" /-->
-            </div>
         </div>
 
         <div class="container">
@@ -69,27 +66,32 @@ if (isset($_POST['username']) && isset($_POST['password']))
             </div>
         </div>
 
-        <script>
-            $("#username, #password").on('input', function () {
+        <script src="translate.js"></script>
+        <script>   
+            //disables login button if empty fields
+            function checkEmptyFields() {
                 if ($("#username").val().trim() != "" && $("#password").val().trim() != "")
                     $("#submit").removeClass('disabled'); else $("#submit").addClass('disabled');
-            });
+            }
 
+            $(document).ready(checkEmptyFields);
+            $("#username, #password").on('input', checkEmptyFields);
+
+            //shows error on submit (overrides default behaviour using ajax post request)
             $("#login").on('submit', function (e) {
                 e.preventDefault();
                 if ($("#submit").hasClass('disabled')) return;
                 $.post("login.php", { username: $("#username").val(), password: $("#password").val() }, function (data) {
-                    if (data == "true") window.location.href = "./";
-                    else { $("#wrongpassword").removeClass('hidden'); shake($("#login")); }
+                    if (data == "true") window.location.href = "./"; //redirects on success
+                    else { $("#wrongpassword").removeClass('hidden'); shake($("#login")); } //shakes error
                 });
             });
 
-            function shake(div) {
+            function shake(div) { //shakes element
                 var interval = 80; var dist = 8; var times = 4; div.css('position', 'relative');
                 for (var i = 0; i < times + 1; i++) div.animate({ left: ((i % 2 == 0 ? dist : dist * -1)) }, interval);
                 div.animate({ left: 0 }, interval);
             }
-
         </script>
     </body>
 </html>

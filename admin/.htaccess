@@ -1,3 +1,6 @@
-RewriteEngine Off
+RewriteEngine On
 
-DirectoryIndex admin.php
+RewriteCond %{REQUEST_FILENAME} !-f
+
+RewriteBase /admin/
+RewriteRule ^(.*)$ admin.php?url=$1 [QSA]

@@ -20,10 +20,10 @@ try
     $result = $stmt->fetch(PDO::FETCH_ASSOC); 
 
     //displays 404 page (not found)
-    if (empty($result)) echofile(FILE_ERROR_404);
+    if ($result == FALSE) echofile(FILE_ERROR_404);
 
     //gets content and sends it
-    echo getContent($result[0]['ContentId']);
+    echo getContent($result['ContentId']);
 
 } //catches errors displaying error page
 catch(PDOException $e) { die3($e->getMessage()); }
@@ -60,6 +60,7 @@ function getContent($id)
 function getContentInfo($id)
 {
     //reads content info from database
+    $conn = connect();
     $stmt = $conn->prepare("SELECT Text, ParentId, CacheTime FROM Contents WHERE Id=:id");
     $stmt->bindParam(":id", $id, PDO::PARAM_INT);
     $stmt->execute();
@@ -67,12 +68,13 @@ function getContentInfo($id)
     $result = $stmt->fetch(PDO::FETCH_ASSOC); //checks empty result
     if (empty($result)) die2("Not found content with id ".$id);
 
-    return $result[0];
+    return $result;
 }
 
 //saves result in cache
 function setContentCache($id, $text)
 {
+    $conn = connect();
     $stmt = $conn->prepare("UPDATE Contents SET Text=:text, CacheTime=UNIX_TIMESTAMP(NOW()) WHERE Id=:id");
     $stmt->bindParam(":id", $id, PDO::PARAM_INT);
     $stmt->bindParam(":text", $text, PDO::PARAM_STR);
@@ -83,8 +85,9 @@ function setContentCache($id, $text)
 function getSubs($contentid)
 {
     //reads content info from database
+    $conn = connect();
     $stmt = $conn->prepare("SELECT Macro, ReplaceId FROM Substitutions WHERE SearchId=:id ORDER BY OrderIndex ASC");
     $stmt->bindParam(":id", $contentid, PDO::PARAM_INT);
     $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
