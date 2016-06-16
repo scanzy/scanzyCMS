@@ -1,7 +1,10 @@
 <?php
     
 //includes info about db and function to connect
-include '/config.php';
+require_once './shared.php';
+
+//sets error mode html
+setErrMode(ER_MODE_HTML);
 
 //reads the url of file to process
 if (!isset($_GET['url'])) $_GET['url'] = "";
@@ -20,13 +23,13 @@ try
     $result = $stmt->fetch(PDO::FETCH_ASSOC); 
 
     //displays 404 page (not found)
-    if ($result == FALSE) echofile(FILE_ERROR_404);
+    if ($result == FALSE) die2(404);
 
     //gets content and sends it
     echo getContent($result['ContentId']);
 
 } //catches errors displaying error page
-catch(PDOException $e) { die3($e->getMessage()); }
+catch(PDOException $e) { die2(500, $e->getMessage()); }
 
 exit();
 
@@ -49,7 +52,9 @@ function getContent($id)
     else $text = getContent($info['ParentId']);
 
     //now performs substitutions reading content text from database (eventually using cache)
-    foreach($subs as $sub) $text = str_replace(MACRO_PREFIX.$sub['Macro'].MACRO_SUFFIX, getContent($sub['ReplaceId']), $text);
+    foreach($subs as $sub) $text = str_replace(
+        $_SESSION['scanzycms-config']['Macro']['prefix'].$sub['Macro'].
+        $_SESSION['scanzycms-config']['Macro']['suffix'], getContent($sub['ReplaceId']), $text);
 
     //everything has been processed so it caches result
     setContentCache($id, $text);
@@ -66,7 +71,7 @@ function getContentInfo($id)
     $stmt->execute();
 
     $result = $stmt->fetch(PDO::FETCH_ASSOC); //checks empty result
-    if (empty($result)) die2("Not found content with id ".$id);
+    if (empty($result)) die2(404, "Not found content with id ".$id);
 
     return $result;
 }

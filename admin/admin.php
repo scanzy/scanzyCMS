@@ -1,11 +1,14 @@
 <?php
 
 //includes info about db and misc functions
-require_once '../config.php';
+require_once '../shared.php';
 
 //if ajax request (perform action)
 if (isset($_REQUEST['action']))
 {
+    //sets error handler
+    setErrMode(ERR_MODE_AJAX);
+
     //every action requires login, if no login sends 401 error
     if (!alreadyLogged()) die2(401, "Login required");
 
@@ -325,8 +328,14 @@ function db_setup($errorcallback)
     exit();
 }
 
+//sets error handler
+setErrMode(ERR_MODE_HTML);
+
 //redirects to login page if no login 
 if (!alreadyLogged()) redirect("./login.php");
+
+//default page
+if (!isset($_REQUEST['url'])) $_REQUEST['url'] = "";
 
 ?>
 
@@ -354,23 +363,12 @@ if (!alreadyLogged()) redirect("./login.php");
             </div>
             <div class="collapse navbar-collapse" id="topbarcontent">
                 <ul class="nav">
-                    <li>
-                        <a href="#dashboard"><span>Dashboard</span></a>
-                    </li><!--<li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            Files
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">New file</a></li>
-                            <li><a href="#">View list</a></li>
-                        </ul>
-                    </li>-->
-                    </li><li><a href="#files">Files</a>
-                    </li><li><a href="#templates">Templates</a>
-                    </li><li><a href="#settings">Settings</a>
+                    <li><a href="dashboard"><span>Dashboard</span></a></li>
+                    </li><li><a href="files">Files</a>
+                    </li><li><a href="templates">Templates</a>
+                    </li><li><a href="settings">Settings</a>
                     </li><li class="right"><a href="#" id="logout">Logout</a>
-                    </li><li class="right"><a href="#help">Help</a>
+                    </li><li class="right"><a href="help">Help</a>
                     </li>
                 </ul>
             </div>
@@ -384,7 +382,8 @@ if (!alreadyLogged()) redirect("./login.php");
             </div>
         </div>
 
-        <div data-hash="dashboard" class="container page">
+        <?php switch ($_REQUEST['url']) { case "": case "dashboard": ?>
+        <div class="container page">
             <div class="box title"><h1>Dashboard</h1></div>
 
             <div class="box">
@@ -393,46 +392,44 @@ if (!alreadyLogged()) redirect("./login.php");
             </div>
         </div>
 
-        <div data-hash="files" class="container page">
+        <?php break; case "files": ?>
+        <div class="container page">
             <div class="box title"><h1>Files</h1></div>
 
             <div class="box"><div id="files-list"></div></div>
         </div>
 
-        <div data-hash="templates" class="container page">
+        <?php break; case "templates": ?>
+        <div class="container page">
             <div class="box title"><h1>Templates</h1></div>
 
             <div class="box"><div id="contents-list"></div></div>
         </div>
 
-        <div data-hash="macros" class="container page">
-            <div class="box title"><h1>Macros</h1></div>
-
-            <div class="box"><div id="macros-list"></div></div>
-        </div>
-
-        <div data-hash="settings" class="container page">
+        <?php break; case "settings": ?>
+        <div class="container page">
             <div class="box title"><h1>Settings</h1></div>
             
             <div class="row noselect">
                 <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
-                    <h2>Database connection</h2>
                     <form id="db-conn" class="box" role="form">
+                        <h3 class="title" style="color: #aaa">Database connection</h3>
+                        <div class="line"></div>                    
                         <div class="form-group">
                             <label for="host">Host:</label>
-                            <input type="text" class="form-control" id="host">
+                            <input type="text" class="form-control" id="dbhost">
                         </div>
                         <div class="form-group">
                             <label for="name">Database name:</label>
-                            <input type="text" class="form-control" id="name">
+                            <input type="text" class="form-control" id="dbname">
                         </div>
                         <div class="form-group">
                             <label for="username">Username:</label>
-                            <input type="text" class="form-control" id="username">
+                            <input type="text" class="form-control" id="dbuser">
                         </div>
                         <div class="form-group">
                             <label for="password">Password:</label>
-                            <input type="password" class="form-control" id="password">
+                            <input type="password" class="form-control" id="dbpwd">
                         </div>
                         <p class="center" style="height: 2em">
                             <span id="db-test-error" class="label label-danger hidden">Connection failed</span>
@@ -440,13 +437,15 @@ if (!alreadyLogged()) redirect("./login.php");
                             <span id="db-save-error" class="label label-danger hidden">Error while saving new configuration</span>
                             <span id="db-save-ok" class="label label-success hidden">New configuration saved</span>
                         </p>
-                        <button id="db-save" type="submit" class="btn btn-success disabled">Save</button>
-                        <button id="db-cancel" type="submit" class="btn btn-default disabled">Cancel</button>
                         <button id="db-test" type="submit" class="btn btn-info">Test connection</button>
+                        <button id="db-save" type="submit" class="btn btn-success disabled">Save</button>
+                        <button id="db-cancel" type="submit" class="btn btn-default disabled">Cancel</button>                 
                     </form>
                 </div>
             </div>
         </div>
+
+        <?php break; default: ?><script>window.location.href = "./";</script><?php echo "</body></html>"; exit(); break; } ?>
 
         <div id="footer">
             <span>Powered by <b>ScanzySoftware</b></span>
@@ -456,120 +455,8 @@ if (!alreadyLogged()) redirect("./login.php");
         <script src="messages.js"></script>
         <script src="confirm.js"></script>
         <script src="scanzytable.js"></script>
-        <script>
-            function GetParam(p) { //gets GET param from url                
-                var params = window.location.search.substring(1).split('&');
-                for (var i = 0; i < params.length; i++)
-                    if (p == params[i].split('=')[0])
-                        return params[i].split('=')[1];
-            }
-
-            function errorPopup(xhr, text, error) { showError("<strong>" + xhr.status + " " + error + ":</strong> " + xhr.responseText); }
-            function ajax(data, callback) { //sends ajax post request showing popup on error
-                return $.post("./", data, function (data) { if (callback != undefined) callback(data); }).fail(errorPopup);
-            }
-
-            //logout button
-            $("#logout").click(function () { ajax({ action: 'logout' }, function () { window.location = "./login.php" }); });
-
-            //inits files table
-            filestable = $("#files-list").scanzytable({
-                search_placeholder: "Search files...",
-                new_text: "New file", new_click: function () { showError("Not implemented "); },
-                columns_names: ["File path (URL)", "File content", ""],
-                request: {
-                    url: "./", method: "GET", data: { request: "file", action: "get" },
-                    check_empty: function (data) { return (data.length == 0); },
-                    fetch: function (data) {
-                        var html = "";
-                        for (var i = 0; i < data.length; i++)
-                            html += '<tr><td><a href="../' + data[i]['Url'] + '" target="_blank">/' + data[i]['Url'] + '</a></td><td>' +
-                        data[i]['ContentId'] + '</td><td class="right"><button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' +
-                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-eye-open"></span> <span>View</span></button> <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' +
-                        data[i]['ContentId'] + ');"><span class="glyphicon glyphicon-edit"></span> <span>Edit</span></button> <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' +
-                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-trash"></span> <span>Delete</span></button></td></tr>';
-                        return html;
-                    },
-                    done: function () { translate(document.getElementById("files-list")); }, error: errorPopup
-                }
-            });
-
-            //inits contents table
-            contentstable = $("#contents-list").scanzytable({
-                search_placeholder: "Search contents...",
-                new_text: "New content", new_click: function () { showError("Not implemented "); },
-                columns_names: ["#", "Name", "Macros", ""],
-                request: {
-                    url: "./", method: "GET", data: { request: "content", action: "get" },
-                    check_empty: function (data) { return (data.length == 0); },
-                    fetch: function (data) {
-                        var html = "";
-                        for (var i = 0; i < data.length; i++)
-                            html += '<tr><td><a href="../' + data[i]['Id'] + '" target="_blank">/' + data[i]['Name'] + '</a></td><td>' +
-                        data[i]['Id'] + '</td><td class="right"><button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' +
-                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-eye-open"></span> <span>View</span></button> <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' +
-                        data[i]['Id'] + ');"><span class="glyphicon glyphicon-edit"></span> <span>Edit</span></button> <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' +
-                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-trash"></span> <span>Delete</span></button></td></tr>';
-                        return html;
-                    },
-                    done: function () { translate(document.getElementById("contents-list")); }, error: errorPopup
-                }
-            });
-
-            //inits macros table
-            macrostable = $("#macros-list").scanzytable({
-                search_placeholder: "Search macros...",
-                new_text: "New content", new_click: function () { showError("Not implemented "); },
-                columns_names: ["#", "Macro Name", "Macros", ""],
-                request: {
-                    url: "./", method: "GET", data: { request: "substitution", action: "get" },
-                    check_empty: function (data) { return (data.length == 0); },
-                    fetch: function (data) {
-                        var html = "";
-                        for (var i = 0; i < data.length; i++)
-                            html += '<tr><td><a href="../' + data[i]['Id'] + '" target="_blank">/' + data[i]['Name'] + '</a></td><td>' +
-                        data[i]['Id'] + '</td><td class="right"><button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' +
-                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-eye-open"></span> <span>View</span></button> <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' +
-                        data[i]['Id'] + ');"><span class="glyphicon glyphicon-edit"></span> <span>Edit</span></button> <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' +
-                        data[i]['Url'] + '\');"><span class="glyphicon glyphicon-trash"></span> <span>Delete</span></button></td></tr>';
-                        return html;
-                    },
-                    done: function () { translate(document.getElementById("contents-list")); }, error: errorPopup
-                }
-            });
-
-            //navigation
-            showPageFromHash = function () {
-                $(".page").each(function () //shows or hides pages elements
-                { $(this).attr('data-hash') == window.location.hash.substr(1) ? $(this).show() : $(this).hide(); });
-
-                $("#topbarcontent").removeClass('in'); //collapses nav (if mobile mode)
-
-                $("a").each(function () //highlights navigation buttons elements
-                { $(this).attr('href') == window.location.hash ? $(this).addClass("active") : $(this).removeClass("active"); });
-
-                switch (window.location.hash) {
-                    case "#files": filestable.loadItems(); break;
-                    case "#contents": contentstable.loadItems(); break;
-                    case "#macros": macrostable.loadItems({ searchid: GetParam("searchid") });
-                }
-            }
-
-            //pages navigation setup
-            $(window).on('hashchange', showPageFromHash);
-            if (window.location.hash == "") window.location.hash = "#dashboard";
-            showPageFromHash();
-
-            function confirmDelFile(url) {
-                showConfirm("<p><span>Do you really want to delete this file?</span> (URL '/" + url + "')</p>", function (x) {
-                    if (x == true) ajax({ action: 'del', request: 'file', url: url },
-                function () { filestable.loadItems(); });
-                });
-            }
-
-            function editContent(id) {
-                showError("Not implemented " + id);
-            }
-        </script>
+        <script src="shared.js"></script>
+        
+        <script src="pages-<?php echo $_REQUEST['url']; ?>.js"></script>
     </body>
 </html>
