@@ -1,10 +1,12 @@
 body { font-family: Verdana; }
 
-.hidden, .page { display: none; }
+.hidden { display: none; }
 .noselect { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
 
 .box { margin-bottom: 1.5em; border-bottom:solid 1px #ccc; padding: 1.5em 0; }
 .box > h1, .box > h2, .box > h3, .box > h4 { margin:0; }
+
+.line { margin:1em 0; border-top:solid 1px #ddd; }
 
 .page > .box:first-child { border-top:solid 1px #ccc;}
 .title { color: #4ad; }
@@ -15,7 +17,7 @@ body { font-family: Verdana; }
 td.right, div.right { text-align: right; }
 button.right { float: right; }
 
-.row { margin-bottom: 1em;}
+.row { margin-bottom: 1em; }
 
 .grey { color:#bbb; }
 .grey a { color:#777; }
