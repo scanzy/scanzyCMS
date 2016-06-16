@@ -18,6 +18,5 @@ If you want to use MsSql you only have to change the setup query (change foreign
 
 1. Download all files and place them on your server (obviusly you can delete license and readme)
 2. Make sure your server has .htaccess enabled and RewriteEngine overridable 
-3. Edit admin/config.php changing database credentials (hostname, user, ecc) and users credentials
-4. Visit admin/ with your browser and you'll be redirected to login page, enter credentials and login
-5. Click on setup (well, I'll create a setup button), this will connect to database and create needed table
+3. Visit admin/ with your browser, enter default credentials and login (username: admin, password: root)
+4. Click on setup (well, I'll create a setup button), this will connect to database and create needed table
