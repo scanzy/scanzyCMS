@@ -22,10 +22,12 @@
     "View": "Visualizza",
     "Edit": "Modifica",
     "OK": "OK",
+    "Save": "Salva",
     "Cancel": "Annulla",
     "Do you really want to delete this file?": "Sei veramente sicuro di voler eliminare questo file?",
     "Search files..." : "Cerca file...",
     "Search contents...": "Cerca contenuti...",
     "Reset search" : "Chiudi ricerca",
-    "No rows matching searched string": "Nessuna riga contiene la stringa cercata"
+    "No rows matching searched string": "Nessuna riga contiene la stringa cercata",
+    "Test connection": "Test connessione"
 }

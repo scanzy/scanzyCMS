@@ -20,7 +20,7 @@ function getErrMode() { return (isset($GLOBALS['scanzycms-errmode']) ? $GLOBALS[
 function die2($code, $msg = "")
 {
     //sends header with error
-    $codenames = array(400 => "Bad Request", 401 => "Unauthorized", 500 => "Internal Server Error");
+    $codenames = array(400 => "Bad Request", 401 => "Unauthorized", 403 => "Forbidden", 500 => "Internal Server Error");
     header($_SERVER['SERVER_PROTOCOL'].' '.$code.' '.$codenames[$code], TRUE, $code);
 
     switch (getErrMode()) 
@@ -42,6 +42,10 @@ function die2($code, $msg = "")
     }
     exit();
 }
+
+//php error handler
+function errorHandler($level, $msg, $file, $line) { die2(500, "PHP error in file ".$file." at line ".$line.". Error: ".$msg); }
+set_error_handler("errorHandler"); //sets error handler
 
 //------------------------------------------------------------------------------------------------
 //CONFIGURATION

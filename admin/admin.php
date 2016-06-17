@@ -13,6 +13,9 @@ function alreadyLogged()
     return isset($_SESSION['username']);    
 }
 
+//isAdmin
+function isAdmin() { return ($_SESSION['usergroup'] == "Admins"); }
+
 //loads users in $_SESSION['scanzycms-users'] reading from users.ini
 function loadUsers()
 {
@@ -58,7 +61,7 @@ if (isset($_REQUEST['action']))
                 {
                     //saves username and usertype
                     $_SESSION['username'] = $_POST['username'];
-                    $_SESSION['usertype'] = $type;
+                    $_SESSION['usergroup'] = $type;
 
                     echo "true"; //success!
                     exit();
@@ -78,6 +81,17 @@ if (isset($_REQUEST['action']))
     //checks setup/logout action
     if ($_REQUEST['action'] == "setup") db_setup($dberrorcallback);
     if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
+
+    //checks config/user actions
+    if ($_REQUEST['request'] == "config" || $_REQUEST['request'] == "user")
+    {
+        //if not admin, sends 403 error
+        if (!isAdmin()) die2(403, "Only Admins can view/edit configuration or users");
+
+        //TODO: ini helper
+
+        exit();
+    }
 
     //gets helper object
     $helper = getHelper($_REQUEST['request'], $paramserrorcallback, $dberrorcallback);
@@ -401,6 +415,7 @@ if (!alreadyLogged()) redirect("./login.html");
 
 //default page
 if (!isset($_REQUEST['url'])) $_REQUEST['url'] = "";
+if ($_REQUEST['url'] == "") redirect("./dashboard");
 
 ?>
 
@@ -447,7 +462,7 @@ if (!isset($_REQUEST['url'])) $_REQUEST['url'] = "";
             </div>
         </div>
 
-        <?php switch ($_REQUEST['url']) { case "": case "dashboard": ?>
+        <?php switch ($_REQUEST['url']) { case "dashboard": ?>
         <div class="container page">
             <div class="box title"><h1>Dashboard</h1></div>
 
@@ -496,15 +511,19 @@ if (!isset($_REQUEST['url'])) $_REQUEST['url'] = "";
                             <label for="password">Password:</label>
                             <input type="password" class="form-control" id="dbpwd">
                         </div>
-                        <p class="center" style="height: 2em">
+                        <p id="db-msgs" class="center" style="height: 2em">
                             <span id="db-test-error" class="label label-danger hidden">Connection failed</span>
                             <span id="db-test-ok" class="label label-info hidden">Connection OK</span>
+                            <span id="db-load-error" class="hidden">
+                                <span class="label label-danger">Error while reading configuration</span>
+                                <a href="#" onclick="resetForm(); return false;"><span class="label label-info">Retry</span></a>
+                            </span>
                             <span id="db-save-error" class="label label-danger hidden">Error while saving new configuration</span>
                             <span id="db-save-ok" class="label label-success hidden">New configuration saved</span>
                         </p>
-                        <button id="db-test" type="submit" class="btn btn-info">Test connection</button>
-                        <button id="db-save" type="submit" class="btn btn-success disabled">Save</button>
-                        <button id="db-cancel" type="submit" class="btn btn-default disabled">Cancel</button>                 
+                        <button id="db-test" class="btn btn-info">Test connection</button>
+                        <button id="db-save" class="btn btn-success disabled">Save</button>
+                        <button id="db-cancel" class="btn btn-default disabled">Cancel</button>                 
                     </form>
                 </div>
             </div>
@@ -521,6 +540,7 @@ if (!isset($_REQUEST['url'])) $_REQUEST['url'] = "";
         <script src="confirm.js"></script>
         <script src="scanzytable.js"></script>
         <script src="shared.js"></script>
+        <script src="shake.js"></script>
         
         <script src="pages-<?php echo $_REQUEST['url']; ?>.js"></script>
     </body>
