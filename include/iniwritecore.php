@@ -52,7 +52,7 @@ function write_from_request($path, $prototype, $data, $usesections = FALSE, $mod
         //for each entry of prototype (sections)
         foreach($prototype as $secname)
             if (isset($_REQUEST[$secname])) //if specified param, merges data
-                $data[$secname] = array_merge($data[$secname], $_REQUEST[$secname])
+                $data[$secname] = array_merge($data[$secname], $_REQUEST[$secname]);
     }
     else 
     {
