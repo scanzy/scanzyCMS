@@ -2,10 +2,10 @@ langdata = undefined;
 
 //gets language data and translates body
 lang = navigator.language || navigator.userLanguage;
-$.getJSON("locales/" + lang + ".json", function (data) {
+$.ajax({ dataType: "json", url: "locales/" + lang + ".json", cache:true, success: function (data) {
     langdata = data; document.getElementsByTagName("html")[0].setAttribute("lang", lang);
     translatenow(document);
-});
+}});
 
 //translates only if lang data loaded
 function translate(element) { if (langdata != undefined) translatenow((element != undefined) ? element : document); }
