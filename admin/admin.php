@@ -42,7 +42,15 @@ if (isset($_REQUEST['action']))
         //if not admin, sends 403 error
         if (!isAdmin()) die2(403, "Only Admins can view/edit configuration or users");
 
-        //TODO: ini helper
+        switch($_REQUEST['action'])
+        {
+            case "update": break;
+
+            case "del": break;
+
+            //error
+            default: die2(400, "Unknown action"); break;
+        }
 
         exit();
     }

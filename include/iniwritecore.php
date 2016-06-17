@@ -44,4 +44,26 @@ function write_ini_entry($name, $value, $mode = INI_SCANNER_NORMAL)
     return $name." = \"".$value."\"".PHP_EOL;
 }
 
+//writes to ini file adding/editing entries read from request
+function write_from_request($path, $prototype, $data, $usesections = FALSE, $mode = INI_SCANNER_NORMAL)
+{
+    if ($usesections)
+    { 
+        //for each entry of prototype (sections)
+        foreach($prototype as $secname)
+            if (isset($_REQUEST[$secname])) //if specified param, merges data
+                $data[$secname] = array_merge($data[$secname], $_REQUEST[$secname])
+    }
+    else 
+    {
+        //for each entry of prototype
+        foreach($prototype as $name)
+            if (isset($_REQUEST[$name])) //if specified param, sets data (or updates)
+                $data[$name] = $_REQUEST[$name];
+    }
+
+    //writes to file
+    return write_ini_file($path, $data, $usesections, $mode);
+}
+
 ?>

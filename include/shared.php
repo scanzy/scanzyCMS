@@ -5,7 +5,8 @@ require_once __DIR__.'/configload.php';
 //--------------------------------------------------------------------------------------------
 //ERROR HANDLING
 
-define("ERRORS_DIR", "errors"); //error pages are here
+define("ERRORS_DIR", "../errors/"); //error pages are here
+define("DEFAULT_ERROR_PAGE", "other.html"); //default error page
 
 define("ERR_MODE_AJAX", 0); //sends error using plain text (default)
 define("ERR_MODE_HTML", 1); //sends error displaying error page
@@ -23,17 +24,19 @@ function die2($code, $msg = "")
 
     switch (getErrMode()) 
     {
-        case ERR_MODE_HTML: //html handler (html page)
+        case ERR_MODE_HTML: //html handler (html page)           
             
-            //only if specified in config
-            $conf = loadConfig();
-            if (isset($conf['Errors'])) 
-                if (isset($conf[$code])) 
+            $file = NULL; //searches error page for this error or default if not found error page
+            if (file_exists(ERRORS_DIR.$code.".html")) $file = ERRORS_DIR.$code.".html";
+            else if (file_exists(ERRORS_DIR.DEFAULT_ERROR_PAGE)) $file = ERRORS_DIR.DEFAULT_ERROR_PAGE;
+
+            if ($file != NULL) 
             {
                 setErrMode(ERR_MODE_AJAX); //to prevent infinite loop on errors
                 header("X-error-msg: ".$msg); //send message as header
-                echofile(ERRORS_DIR."/".$conf['Errors'][$code]);                
+                echofile(ERRORS_DIR.$conf['Errors'][$code]); //displays error page               
             }      
+            else die($msg); //if no error pages found uses ajax mode (plain text)
             break;    
         
         case ERR_MODE_AJAX: default: die($msg); break; //ajax handler only text 
