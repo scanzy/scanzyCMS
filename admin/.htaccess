@@ -5,9 +5,3 @@ RewriteCond %{REQUEST_FILENAME} !-f
 
 RewriteBase /admin/
 RewriteRule ^(.*)$ admin.php?url=$1 [QSA]
-
-# this forbids access to users.ini 
-<Files ./users.ini>
-Order Allow,Deny
-Deny from all
-</Files>

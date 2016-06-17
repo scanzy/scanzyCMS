@@ -251,5 +251,26 @@ function db_setup($errorcallback)
     exit();
 }   
 
+//used to delete database tables
+function db_reset($errorcallback)
+{
+    //connects to database
+    try { $conn = connect(); } 
+    catch(PDOException $e) { $errorcallback("Connection error: ".$e->getMessage()); }
+
+    //deletes tables
+    $errors = array();
+    $tables = array("Contents", "Substitutions", "Files", "Tags", "ContentTags", "MacroTags");
+    
+    //executes queries
+    foreach($tables as $t)        
+        try { $conn->exec("DROP TABLE ".$t); } //deletes table 
+        catch(PDOException $e) { $errors[] = $e; } //adds error
+
+    if (count($errors) > 0) //sends errors if any
+        $errorcallback(count($errors)." of ".count($tables)." table(s) NOT deleted, they might not exist");
+
+    exit();
+}
 
 ?>

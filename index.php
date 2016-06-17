@@ -1,10 +1,10 @@
 <?php
     
-//includes misc functions (db connection, conf loading, ecc)
-require_once './shared.php';
+//includes misc functions (db connection, error handling, ecc)
+require_once './include/shared.php';
 
 //sets error mode html
-setErrMode(ER_MODE_HTML);
+setErrMode(ERR_MODE_HTML);
 
 //reads the url of file to process
 if (!isset($_GET['url'])) $_GET['url'] = "";

@@ -1,37 +1,10 @@
 <?php
 
 //includes misc functions (db connection, conf loading, ecc)
-require_once '../shared.php';
-require_once './dbhelper.php';
-
-//----------------------------------------------------------------------------------------------
-//AUTHENTICATION
-
-//checks if there was login
-function alreadyLogged()
-{  
-    //if no data from session
-    return isset($_SESSION['username']);    
-}
-
-//isAdmin
-function isAdmin() { return ($_SESSION['usergroup'] == "Admins"); }
-
-//loads users in $_SESSION['scanzycms-users'] reading from users.ini
-function loadUsers()
-{
-    $_SESSION['scanzycms-users'] = parse_ini_file(USERS_FILE, TRUE); //gets data
-    if ($_SESSION['scanzycms-users'] == FALSE) 
-        die2(500, "Error while parsing users data");
-    return $_SESSION['scanzycms-users'];
-}
-
-//writes configuration in $_SESSION['scanzycms-users'] to users.ini file
-function saveUsers()
-{
-    if(write_ini_file(USERS_FILE, $_SESSION['scanzycms-users'], TRUE) == FALSE)
-        die2("Error while saving users data");
-}
+require_once '../include/shared.php';
+require_once '../include/dbrequests.php';
+require_once '../include/users.php';
+require_once '../include/configsave.php';
 
 //-------------------------------------------------------------------------------------------
 //AJAX MODE
@@ -42,35 +15,9 @@ if (isset($_REQUEST['action']))
     //sets error handler
     setErrMode(ERR_MODE_AJAX);
 
-    //check if login action
-    if ($_REQUEST['action'] == "login")
-    {
-        //check parameters
-        if (!isset($_POST['username']) || !isset($_POST['password']))
-            die2(400, "Required username and password params");
-        
-        $users = loadUsers(); //loads users data
-
-        //checks if finds user
-        foreach($users as $type => $usergroup)
-            
-            //check if user exists
-            if(isset($usergroup[$_POST['username']])) 
-
-                //checks password
-                if ($usergroup[$_POST['username']] == $_POST['password']) 
-                {
-                    //saves username and usertype
-                    $_SESSION['username'] = $_POST['username'];
-                    $_SESSION['usergroup'] = $type;
-
-                    echo "true"; //success!
-                    exit();
-                }
-
-        echo "false"; //login failed
-        exit();
-    }
+    //check if login/logout action
+    if ($_REQUEST['action'] == "login") login();
+    if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
 
     //every action requires login, if no login sends 401 error
     if (!alreadyLogged()) die2(401, "Login required");
@@ -79,9 +26,15 @@ if (isset($_REQUEST['action']))
     $dberrorcallback = function($msg) { die2(500, $msg); };
     $paramserrorcallback = function($msg) { die2(400, $msg); };
 
-    //checks setup/logout action
-    if ($_REQUEST['action'] == "setup") db_setup($dberrorcallback);
-    if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
+    //checks setup/reset action
+    if ($_REQUEST['action'] == "setup" || $_REQUEST['action'] == "reset")
+    {
+        //if not admin, sends 403 error
+        if (!isAdmin()) die2(403, "Only Admins can setup/reset database");
+
+        if ($_REQUEST['action'] == "setup") db_setup($dberrorcallback);
+        if ($_REQUEST['action'] == "reset") db_reset($dberrorcallback);
+    }    
 
     //checks config/user actions
     if ($_REQUEST['request'] == "config" || $_REQUEST['request'] == "user")
@@ -142,14 +95,6 @@ if (isset($_REQUEST['action']))
         default: die2(400, "Unknown action"); break;
     }
 
-    exit();
-}
-
-//sends json to client
-function sendJSON($obj)
-{
-    header("Content-Type: application/json");
-    echo json_encode($obj);
     exit();
 }
 

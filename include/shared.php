@@ -1,13 +1,11 @@
 <?php
-    
-//used to store public functions used by various other php files
-//use: require_once './shared.php' or require_once '../shared.php' (depending on your php file directory)
 
-define("CONFIG_FILE", "config.ini");
-define("USERS_FILE", "users.ini");
+require_once __DIR__.'/configload.php';
 
-//----------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 //ERROR HANDLING
+
+define("ERRORS_DIR", "errors"); //error pages are here
 
 define("ERR_MODE_AJAX", 0); //sends error using plain text (default)
 define("ERR_MODE_HTML", 1); //sends error displaying error page
@@ -34,7 +32,7 @@ function die2($code, $msg = "")
             {
                 setErrMode(ERR_MODE_AJAX); //to prevent infinite loop on errors
                 header("X-error-msg: ".$msg); //send message as header
-                echofile($conf['Errors'][$code]);                
+                echofile(ERRORS_DIR."/".$conf['Errors'][$code]);                
             }      
             break;    
         
@@ -46,71 +44,6 @@ function die2($code, $msg = "")
 //php error handler
 function errorHandler($level, $msg, $file, $line) { die2(500, "PHP error in file ".$file." at line ".$line.". Error: ".$msg); }
 set_error_handler("errorHandler"); //sets error handler
-
-//------------------------------------------------------------------------------------------------
-//CONFIGURATION
-
-session_start();
-
-//loads configuration in $_SESSION['scanzycms-config'] reading from config.ini
-function loadConfig()
-{
-    if (!isset($_SESSION['scanzycms-config'])) 
-    {
-        $_SESSION['scanzycms-config'] = parse_ini_file(CONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
-        if ($_SESSION['scanzycms-config'] == FALSE) die2(500, "Error while parsing configuration");
-    }
-    return $_SESSION['scanzycms-config'];
-}
-
-//writes configuration in $_SESSION['scanzycms-config'] to config.ini file
-function setConfig()
-{
-    if(write_ini_file(CONFIG_FILE, $_SESSION['scanzycms-config'], TRUE, INI_SCANNER_TYPED) == FALSE)
-        die2("Error while saving configuration");
-}
-
-//writes ini file (returns FALSE on fail)
-function write_ini_file($path, $data, $usesections = FALSE, $mode = INI_SCANNER_NORMAL)
-{
-    $f = fopen($path, "w"); //opens file
-    if ($f == FALSE) return FALSE;
-
-    if ($usesections)
-        foreach($data as $secname => $section)
-        {
-            fwrite($f, "[".$secname."]".PHP_EOL); //writes section head
-            foreach($section as $name => $value) //for each entry
-            fwrite($f, write_ini_entry($name, $value, $mode)); //writes it in ini file
-            fwrite($f, PHP_EOL); // \n or \r\n
-        }
-    else
-    {
-        foreach($data as $name => $value) //for each entry
-        fwrite($f, write_ini_entry($name, $value, $mode)); //writes it in ini file
-    }
-
-    fclose($f); //closes file
-    return TRUE;
-}
-
-//returns an ini file line from name and value
-function write_ini_entry($name, $value, $mode = INI_SCANNER_NORMAL)
-{
-    switch($mode)
-    {
-        case INI_SCANNED_TYPED: //checks special values
-            if ($value === TRUE) return $name." = true".PHP_EOL;
-            if ($value === FALSE) return $name." = false".PHP_EOL;
-            if ($value === NULL) return $name." = null".PHP_EOL;
-            if (is_numeric($value)) return $name." = ".$value.PHP_EOL;            
-            break;
-
-        case INI_SCANNER_NORMAL: default: break;         
-    }
-    //default (quotes)
-    return $name." = \"".$value."\"".PHP_EOL;
-}
 
 //--------------------------------------------------------------------------------------------
 //CONNECTION
@@ -135,7 +68,7 @@ function connect()
 }
 
 //used to store last db modification time
-define("LAST_MOD", filemtime(__DIR__.'\\'.CONFIG_FILE));
+define("LAST_MOD", filemtime(__DIR__.'/'.CONFIG_FILE));
 
 //-----------------------------------------------------------------------------------------------
 //OUTPUT
@@ -153,5 +86,13 @@ function echofile($path, $search = "", $replace = "")
 
 //redirects to some page
 function redirect($url){ echo "<script>window.location = '".$url."'</script>"; exit(); }
+
+//sends json to client
+function sendJSON($obj)
+{
+    header("Content-Type: application/json");
+    echo json_encode($obj);
+    exit();
+}
 
 ?>
