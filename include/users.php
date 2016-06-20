@@ -66,4 +66,16 @@ function saveUsers()
         die2("Error while saving users data");
 }
 
+//called to process requests about users
+function usersRequest()
+{
+    switch($_REQUEST['action'])
+    {
+        case "add": break;
+        case "edit": break;
+        case "remove": break;
+        default: die2(400, "Unknown action"); break;
+    }
+}
+
 ?>

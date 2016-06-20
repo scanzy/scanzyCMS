@@ -31,7 +31,7 @@ function write_ini_entry($name, $value, $mode = INI_SCANNER_NORMAL)
 {
     switch($mode)
     {
-        case INI_SCANNED_TYPED: //checks special values
+        case INI_SCANNER_TYPED: //checks special values
             if ($value === TRUE) return $name." = true".PHP_EOL;
             if ($value === FALSE) return $name." = false".PHP_EOL;
             if ($value === NULL) return $name." = null".PHP_EOL;
@@ -50,7 +50,7 @@ function write_from_request($path, $prototype, $data, $usesections = FALSE, $mod
     if ($usesections)
     { 
         //for each entry of prototype (sections)
-        foreach($prototype as $secname)
+        foreach($prototype as $secname => $section)
             if (isset($_REQUEST[$secname])) //if specified param, merges data
                 $data[$secname] = array_merge($data[$secname], $_REQUEST[$secname]);
     }

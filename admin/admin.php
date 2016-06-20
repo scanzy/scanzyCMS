@@ -19,44 +19,37 @@ if (isset($_REQUEST['action']))
     if ($_REQUEST['action'] == "login") login();
     if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
 
+    //checks permissionsc
+
     //every action requires login, if no login sends 401 error
     if (!alreadyLogged()) die2(401, "Login required");
 
-    //sets callbacks
-    $dberrorcallback = function($msg) { die2(500, $msg); };
-    $paramserrorcallback = function($msg) { die2(400, $msg); };
+    //if not admin, sends 403 error
+    if ($_REQUEST['action'] == "setup" || 
+        $_REQUEST['action'] == "reset")        
+        if (!isAdmin()) 
+            die2(403, "Only Admins can setup/reset database");
+
+    //if not admin, sends 403 error
+    if ($_REQUEST['request'] == "config" || 
+        $_REQUEST['request'] == "user")
+        if (!isAdmin()) 
+            die2(403, "Only Admins can view/edit configuration or users");
 
     //checks setup/reset action
-    if ($_REQUEST['action'] == "setup" || $_REQUEST['action'] == "reset")
-    {
-        //if not admin, sends 403 error
-        if (!isAdmin()) die2(403, "Only Admins can setup/reset database");
-
-        if ($_REQUEST['action'] == "setup") db_setup($dberrorcallback);
-        if ($_REQUEST['action'] == "reset") db_reset($dberrorcallback);
-    }    
-
+    if ($_REQUEST['action'] == "setup") db_setup();
+    if ($_REQUEST['action'] == "reset") db_reset();
+    
     //checks config/user actions
-    if ($_REQUEST['request'] == "config" || $_REQUEST['request'] == "user")
-    {
-        //if not admin, sends 403 error
-        if (!isAdmin()) die2(403, "Only Admins can view/edit configuration or users");
+    if ($_REQUEST['request'] == "config") configRequest();
+    if ($_REQUEST['request'] == "users") usersRequest();
 
-        switch($_REQUEST['action'])
-        {
-            case "update": break;
-
-            case "del": break;
-
-            //error
-            default: die2(400, "Unknown action"); break;
-        }
-
-        exit();
-    }
+    //sets helper callbacks
+    DBhelper::$dberrorcallback = function($msg) { die2(500, $msg); };
+    DBhelper::$paramserrorcallback = function($msg) { die2(400, $msg); };
 
     //gets helper object
-    $helper = getHelper($_REQUEST['request'], $paramserrorcallback, $dberrorcallback);
+    $helper = getHelper($_REQUEST['request']);
     
     //selects action type
     switch($_REQUEST['action'])

@@ -9,11 +9,11 @@ setErrMode(ERR_MODE_HTML);
 //reads the url of file to process
 if (!isset($_GET['url'])) $_GET['url'] = "";
 
+//connects to database
+$conn = connect();
+
 try 
 {
-    //connects to database
-    $conn = connect();
-
     //prepares query
     $stmt = $conn->prepare("SELECT ContentId FROM Files WHERE Url=:url");
     $stmt->bindParam(":url", $_GET['url'], PDO::PARAM_STR);

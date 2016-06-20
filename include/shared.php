@@ -67,13 +67,17 @@ function connect()
     //reads configuration from config.ini if needed
     $conf = loadConfig();
 
-    //connects to database
-    $GLOBALS['scanzycms-conn'] = new PDO("mysql:host=".$conf['DB']['host'].";dbname=".
-        $conf['DB']['name'], 
-        $conf['DB']['user'], 
-        $conf['DB']['pwd']);
+    try {
+        //connects to database
+        $GLOBALS['scanzycms-conn'] = new PDO("mysql:host=".$conf['DB']['host'].";dbname=".
+            $conf['DB']['name'], 
+            $conf['DB']['user'], 
+            $conf['DB']['pwd']);
 
-    $GLOBALS['scanzycms-conn']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $GLOBALS['scanzycms-conn']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    catch(PDOException $e) { die2(500, "Connection error: ".$e->getMessage()); }
+
     return $GLOBALS['scanzycms-conn'];      
 }
 
