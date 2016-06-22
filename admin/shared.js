@@ -22,4 +22,10 @@ $("#logout").click(function () { ajax({ action: 'logout' }, function () { window
 //$("#topbarcontent").removeClass('in'); //collapses nav (if mobile mode)
 
 $("a").each(function () //highlights navigation buttons elements
-{ $(this).attr('href') == window.location.href.split("/").pop() ? $(this).addClass("active") : $(this).removeClass("active"); });       
+{ $(this).attr('href') == window.location.href.split("/").pop() ? $(this).addClass("active") : $(this).removeClass("active"); }); 
+
+//enables bootstrap tooltip
+$(document).ready(function(){ $('[data-toggle="tooltip"]').tooltip(); });
+
+function hideAllTooltips() { $('[data-toggle="tooltip"]').tooltip('hide'); }
+      

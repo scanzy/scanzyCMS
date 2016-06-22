@@ -124,6 +124,7 @@ if ($_REQUEST['url'] == "") redirect("./dashboard");
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
         <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="bootstrap-ex.css" />
         <link rel="stylesheet" type="text/css" href="style.css" />
         <script src="translate.js"></script>
         <script src="shake.js"></script>       
@@ -188,7 +189,7 @@ if ($_REQUEST['url'] == "") redirect("./dashboard");
             <div class="box title"><h1>Settings</h1></div>
             
             <div class="row noselect">
-                <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
+                <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
                     <form id="db-conn" class="box" role="form" autocomplete="off">
                         <h3 class="title" style="color: #aaa">Database connection</h3>
                         <div class="line"></div>                    
@@ -207,20 +208,25 @@ if ($_REQUEST['url'] == "") redirect("./dashboard");
                         <div class="form-group">
                             <label for="password">Password:</label>
                             <input type="password" class="form-control" id="dbpwd" autocomplete="off">
+                        </div>                       
+                        <div id="db-msgs" class="progress">
+                            <div id="db-load-error" class="progress-bar progress-bar-danger fill hidden">
+                                <span>Error while reading configuration</span>
+                                <a onclick="resetForm(); return false;">Retry</a>
+                            </div>
+                            <div id="db-load" class="progress-bar progress-bar-info progress-bar-striped active fill"><span>Loading configuration...</span></div>
+                            <div id="db-saving" class="progress-bar progress-bar-info progress-bar-striped active fill hidden"><span>Saving configuration...</span></div>
+                            <div id="db-save-error" class="progress-bar progress-bar-danger fill hidden"><span>Error while saving new configuration</span></div>
+                            <div id="db-save-ok" class="progress-bar progress-bar-success fill hidden"><span>New configuration saved</span></div>                   
                         </div>
-                        <p id="db-msgs" class="center" style="height: 2em">
-                            <span id="db-test-error" class="label label-danger hidden">Connection failed</span>
-                            <span id="db-test-ok" class="label label-info hidden">Connection OK</span>
-                            <span id="db-load-error" class="hidden">
-                                <span class="label label-danger">Error while reading configuration</span>
-                                <a href="#" onclick="resetForm(); return false;"><span class="label label-info">Retry</span></a>
-                            </span>
-                            <span id="db-save-error" class="label label-danger hidden">Error while saving new configuration</span>
-                            <span id="db-save-ok" class="label label-success hidden">New configuration saved</span>
-                        </p>
-                        <button id="db-test" class="btn btn-info">Test connection</button>
-                        <button id="db-save" class="btn btn-success disabled">Save</button>
-                        <button id="db-cancel" class="btn btn-default disabled">Cancel</button>                 
+                        <div class="right">
+                            <button id="db-test" class="btn btn-info left db-test">Test connection</button>
+                            <button id="db-testing" class="btn btn-info left disabled hidden">Testing...</button>
+                            <button id="db-test-ok" class="btn btn-success left hidden db-test" data-toggle="tooltip" data-placement="bottom" title="Click to test again">Connection OK</button>
+                            <button id="db-test-error" class="btn btn-danger left hidden db-test" data-toggle="tooltip" data-placement="bottom" title="Click to test again">Connection error</button>
+                            <button id="db-save" class="btn btn-success disabled">Save</button>
+                            <button id="db-cancel" class="btn btn-default disabled">Cancel</button>    
+                        </div>             
                     </form>
                 </div>
             </div>

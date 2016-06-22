@@ -16,6 +16,7 @@ body { font-family: Verdana; }
 
 td.right, div.right { text-align: right; }
 button.right { float: right; }
+button.left, span.left { float: left; }
 
 .row { margin-bottom: 1em; }
 
@@ -39,10 +40,7 @@ button.right { float: right; }
     .box, .box.title { padding: 1.5em; background-color:#fff; border-radius: 0.5em; box-shadow: 0px 0px 1em #ccc; border: none; }
 }
 
-ul.dropdown-menu > li { width:100%; }
 .nav li a { transition: background-color .4s ease, color .4s ease; color:#49b; font-size: 1.2em; }
-
-.navbar-collapse.in { overflow-y: visible; }
 
 .nav li a.active { background-color:#eaeaea; }
 .nav li a:hover { background-color:#6bf; color:#fff; }
