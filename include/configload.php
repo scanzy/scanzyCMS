@@ -18,4 +18,10 @@ function loadConfig()
     return $_SESSION['scanzycms-config'];
 }
 
+//used to store last db modification time
+define("LAST_MOD", filemtime(__DIR__.'/'.CONFIG_FILE));
+
+//called to touch config file (so we know last modification)
+function db_modified() { touch(__DIR__.'/'.CONFIG_FILE); }
+
 ?>

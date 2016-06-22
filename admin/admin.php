@@ -58,11 +58,11 @@ if (isset($_REQUEST['action']))
         case "get": sendJSON($helper->getItems2()); break;
 
         //modifies db (updating last modified info touching file)
-        case "new": $helper->newItem2(); touch(FILE_TOUCH); break;
-        case "edit": $helper->editItem2(); touch(FILE_TOUCH); break;
+        case "new": $helper->newItem2(); db_modified(); break;
+        case "edit": $helper->editItem2(); db_modified(); break;
 
         //deletes item and related elements
-        case "del": $helper->delItem2(); touch(FILE_TOUCH);
+        case "del": $helper->delItem2(); db_modified();
 
             //deletes related items
             switch($_REQUEST['request'])

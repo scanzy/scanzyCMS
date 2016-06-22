@@ -36,7 +36,6 @@
     "Error while reading configuration": "Errore durante la lettura della configurazione",
     "Error while saving new configuration": "Errore durante il salvataggio",
     "New configuration saved": "Configurazione salvata",
-    "Connection failed": "Impossibile connettersi",
     "Loading configuration...": "Caricamento configurazione in corso...",
     "Saving configuration...": "Salvataggio configurazione in corso...",
     "Click to test again": "Ripeti test"

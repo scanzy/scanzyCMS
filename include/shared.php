@@ -82,9 +82,6 @@ function connect()
     return $GLOBALS['scanzycms-conn'];      
 }
 
-//used to store last db modification time
-define("LAST_MOD", filemtime(__DIR__.'/'.CONFIG_FILE));
-
 //-----------------------------------------------------------------------------------------------
 //OUTPUT
 
