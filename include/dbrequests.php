@@ -258,11 +258,10 @@ function db_setup()
     $sql = "CREATE TABLE Contents (
                 Id int,
                 Text varchar(8191),
-                ParentId int,
-                Name varchar(31),
+                TemplateId int,
                 CacheTime int(8) NOT NULL,
                 PRIMARY KEY (id),
-                FOREIGN KEY (ParentId) REFERENCES Contents(Id)
+                FOREIGN KEY (ParentId) REFERENCES Templates(Id)
             );
             CREATE TABLE Substitutions (
                 SearchId int NOT NULL,
@@ -270,31 +269,27 @@ function db_setup()
                 OrderIndex int NOT NULL,
                 ReplaceId int NOT NULL,
                 FOREIGN KEY (SearchId) REFERENCES Contents(Id),
-                FOREIGN KEY (ReplaceId) REFERENCES Contents(Id)
+                FOREIGN KEY (ReplaceId) REFERENCES Templates(Id)
+            );
+            CREATE TABLE Templates (
+                Id int,
+                Name varchar(31),
+                Html varchar(8191),
+                ContentId int,
+                PRIMARY KEY (id),
+                FOREIGN KEY (ContentId) REFERNCES Contents(id)
             );
             CREATE TABLE Files (
                 Url varchar(31) UNIQUE NOT NULL,
                 ContentId int NOT NULL,
                 FOREIGN KEY (ContentId) REFERENCES Contents(Id)
             );
-            CREATE TABLE Tags (
-                Id int, 
-                Tag varchar(31) NOT NULL,
-                PRIMARY KEY (Id)
-            );
-            CREATE TABLE ContentTags (
-                TagId int NOT NULL,
-                ContentId int NOT NULL,
-                FOREIGN KEY (TagId) REFERENCES Tags(Id),
-                FOREIGN KEY (ContentId) REFERENCES Contents(Id)
-            );
-            CREATE TABLE MacroTags (
-                TagId int NOT NULL,
-                ContentId int NOT NULL,
+            CREATE TABLE Macros (
+                SearchId int NOT NULL,
                 Macro varchar(31) NOT NULL,
-                FOREIGN KEY (TagId) REFERENCES Tags(Id),
-                FOREIGN KEY (ContentId) REFERENCES Contents(Id),
-                FOREIGN KEY (Macro) REFERENCES Substitutions(Macro)
+                ReplaceId int NOT NULL,
+                FOREIGN KEY (SearchId) REFERENCES Templates(Id),
+                FOREIGN KEY (SearchId) REFERENCES Templates(Id)
             );";
 
     //executes query
@@ -302,6 +297,27 @@ function db_setup()
     catch(PDOException $e) { die2(500, "SQL error: ".$e->getMessage()); }
     exit();
 }   
+
+//used to check if all tables have been set up correctly
+function db_test()
+{
+    //connects to database
+    $conn = connect(); 
+
+    //gets data from tables
+    $errors = array();
+    $tables = array("Contents", "Substitutions", "Files", "Templates", "Macros");
+    
+    //executes queries
+    foreach($tables as $t)        
+        try { $conn->exec("SELECT * FROM TABLE ".$t); } //gets data table 
+        catch(PDOException $e) { $errors[] = $e; } //adds error
+
+    if (count($errors) > 0) //sends errors if any
+        die2(500, count($errors)." of ".count($tables)." table(s) NOT found, they might not exist");
+
+    exit();
+}
 
 //used to delete database tables
 function db_reset()
@@ -311,7 +327,7 @@ function db_reset()
 
     //deletes tables
     $errors = array();
-    $tables = array("Contents", "Substitutions", "Files", "Tags", "ContentTags", "MacroTags");
+    $tables = array("Contents", "Substitutions", "Files", "Templates", "Macros");
     
     //executes queries
     foreach($tables as $t)        
