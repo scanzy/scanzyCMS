@@ -3,7 +3,7 @@
 
 //buttons
 $("#db-save").click(function (e) {
-    e.preventDefault;
+    e.preventDefault();
     if ($(this).hasClass('disabled')) return false;
     $("#db-msgs > span").addClass('hidden');
 
@@ -22,7 +22,7 @@ $("#db-save").click(function (e) {
 });
 
 $("#db-cancel").click(function (e) {
-    e.preventDefault;
+    e.preventDefault();
     if ($(this).hasClass('disabled')) return false;
     $("#db-msgs > span").addClass('hidden');
 
@@ -31,7 +31,7 @@ $("#db-cancel").click(function (e) {
 });
 
 $("#db-test").click(function (e) {
-    e.preventDefault;
+    e.preventDefault();
     if ($(this).hasClass('disabled')) return false;
     $("#db-msgs > span").addClass('hidden');
 
@@ -48,6 +48,9 @@ $("#db-test").click(function (e) {
 
     return false;
 });
+
+//disables save password dialog
+$("#db-conn").submit(function(e) { e.preventDefault(); return false; })
 
 //form reset
 function resetForm()

@@ -51,7 +51,8 @@ function die2($code, $msg = "")
     exit();
 }
 
-//php error handler
+//php error handlers
+function errorHandlerLite($level, $msg, $file, $line) { die2(500, $msg); }
 function errorHandler($level, $msg, $file, $line) { die2(500, "PHP error in file ".$file." at line ".$line.". Error: ".$msg); }
 set_error_handler("errorHandler"); //sets error handler
 

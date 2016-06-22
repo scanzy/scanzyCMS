@@ -189,7 +189,7 @@ if ($_REQUEST['url'] == "") redirect("./dashboard");
             
             <div class="row noselect">
                 <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
-                    <form id="db-conn" class="box" role="form">
+                    <form id="db-conn" class="box" role="form" autocomplete="off">
                         <h3 class="title" style="color: #aaa">Database connection</h3>
                         <div class="line"></div>                    
                         <div class="form-group">
@@ -206,7 +206,7 @@ if ($_REQUEST['url'] == "") redirect("./dashboard");
                         </div>
                         <div class="form-group">
                             <label for="password">Password:</label>
-                            <input type="password" class="form-control" id="dbpwd">
+                            <input type="password" class="form-control" id="dbpwd" autocomplete="off">
                         </div>
                         <p id="db-msgs" class="center" style="height: 2em">
                             <span id="db-test-error" class="label label-danger hidden">Connection failed</span>

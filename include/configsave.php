@@ -33,6 +33,10 @@ function configRequest()
         case "test": 
             try 
             {
+                // host test here
+                if (filter_var(gethostbyname($_REQUEST['host']), FILTER_VALIDATE_IP) === FALSE) die2(400, "Invalid host");
+                //set_error_handler("errorHandlerLite"); //sets error handler (see shared.php)
+
                 //tests db connection config
                 $c = new PDO("mysql:host=".$_REQUEST['host'].";dbname=".
                     $_REQUEST['name'], $_REQUEST['user'], $_REQUEST['pwd']);
