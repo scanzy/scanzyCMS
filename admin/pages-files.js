@@ -2,21 +2,31 @@
 filestable = $("#files-list").scanzytable({
     search_placeholder: "Search files...",
     new_text: "New file", new_click: function () { showError("Not implemented "); },
-    columns_names: ["File path (URL)", "File content", ""],
-    request: {
-        url: "./", method: "GET", data: { request: "file", action: "get" },
-        check_empty: function (data) { return (data.length == 0); },
-        fetch: function (data) {
-            var html = "";
-            for (var i = 0; i < data.length; i++)
-                html += '<tr><td><a href="../' + data[i]['Url'] + '" target="_blank">/' + data[i]['Url'] + '</a></td><td>' +
-            data[i]['ContentId'] + '</td><td class="right"><button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' +
-            data[i]['Url'] + '\');"><span class="glyphicon glyphicon-eye-open"></span> <span>View</span></button> <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' +
-            data[i]['ContentId'] + ');"><span class="glyphicon glyphicon-edit"></span> <span>Edit</span></button> <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' +
-            data[i]['Url'] + '\');"><span class="glyphicon glyphicon-trash"></span> <span>Delete</span></button></td></tr>';
-            return html;
+    columns_names: {
+        "Url": "File path (URL)",
+        "ContentId": "File content",
+        "Buttons": ""
+    },
+    request: { url: "./", method: "GET", data: { request: "file", action: "get" }, error: errorPopup,
+        done: function () { translate(document.getElementById("files-list")); }
+    },
+    fetch: {
+        content: {
+            'Url': function (url) { return '<a href="../' + url + '" target="_blank">/' + url + '</a>'; },
+            'Buttons': function (x, data) {
+                return '\
+                    <button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' + data['Url'] + '\');">\
+                        <span class="glyphicon glyphicon-eye-open"></span> <span>View</span>\
+                    </button> \
+                    <button type="button" class="btn btn-xs btn-warning" onclick="editContent(' + data['ContentId'] + ');">\
+                        <span class="glyphicon glyphicon-edit"></span> <span>Edit</span>\
+                    </button> \
+                    <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelFile(\'' + data['Url'] + '\');">\
+                        <span class="glyphicon glyphicon-trash"></span> <span>Delete</span>\
+                    </button>';
+            }
         },
-        done: function () { translate(document.getElementById("files-list")); }, error: errorPopup
+        cell: { start: function (col) { return (col == "Buttons") ? "<td class='right'>" : "<td>"; } }
     }
 });
 
