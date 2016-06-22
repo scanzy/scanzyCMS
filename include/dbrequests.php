@@ -193,6 +193,62 @@ function getHelper($type)
     return $helper;
 }
 
+//recognizes right DB action and executes it
+function processDBAction()
+{
+    //sets helper callbacks
+    DBhelper::$dberrorcallback = function($msg) { die2(500, $msg); };
+    DBhelper::$paramserrorcallback = function($msg) { die2(400, $msg); };
+
+    //gets helper object
+    $helper = getHelper($_REQUEST['request']);
+    
+    //selects action type
+    switch($_REQUEST['action'])
+    {
+        //reads db
+        case "get": sendJSON($helper->getItems2()); break;
+
+        //modifies db (updating last modified info touching file)
+        case "new": $helper->newItem2(); db_modified(); break;
+        case "edit": $helper->editItem2(); db_modified(); break;
+
+        //deletes item and related elements
+        case "del": $helper->delItem2(); db_modified();
+
+            //deletes related items
+            switch($_REQUEST['request'])
+            {
+                case "content": 
+                    
+                    //deletes files with that content id
+                    DBhelper::delItem("Files", array("id" => "ContentId"), array(), $paramserrorcallback, $dberrorcallback);
+
+                    //deletes substitutions for that content and of that content
+                    DBhelper::delItem("Substitutions", array("id" => "SearchId"), array(), $paramserrorcallback, $dberrorcallback);
+                    DBhelper::delItem("Substitutions", array("id" => "ReplaceId"), array(), $paramserrorcallback, $dberrorcallback);
+
+                    //deletes contenttags and macrotags
+                    DBhelper::delItem("ContentTags", array("id" => "ContentId"), array(), $paramserrorcallback, $dberrorcallback);
+                    DBhelper::delItem("MacroTags", array("id" => "ContentId"), array(), $paramserrorcallback, $dberrorcallback);
+
+                    break;
+
+                case "tag": 
+                    
+                    //deletes contenttags and macrotags
+                    DBhelper::delItem("ContentTags", array("id" => "TagId"), array(), $paramserrorcallback, $dberrorcallback);
+                    DBhelper::delItem("MacroTags", array("id" => "TagId"), array(), $paramserrorcallback, $dberrorcallback);
+                    
+                    break;
+            }
+            break;
+        
+        //error
+        default: die2(400, "Unknown action"); break;
+    }
+}
+
 //used to create database tables
 function db_setup()
 {
