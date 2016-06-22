@@ -27,5 +27,6 @@ $("a").each(function () //highlights navigation buttons elements
 //enables bootstrap tooltip
 $(document).ready(function(){ $('[data-toggle="tooltip"]').tooltip(); });
 
+//call this if you are the button you are clicking
 function hideAllTooltips() { $('[data-toggle="tooltip"]').tooltip('hide'); }
       

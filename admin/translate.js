@@ -17,7 +17,7 @@ function translatenow(element) {
 
     //translates attributes
     var a = ["alt", "title", "placeholder"];
-    e = element.querySelectorAll("img, input, a");
+    e = element.querySelectorAll("img, input, a, button");
     for (var i = 0; i < e.length; i++) for (var j = 0; j < a.length; j++)
     { var attr = e[i].getAttribute(a[j]); if (attr != null && attr != "") 
         if (attr in langdata) e[i].setAttribute(a[j], langdata[attr]); }

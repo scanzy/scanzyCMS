@@ -19,30 +19,16 @@ if (isset($_REQUEST['action']))
     if ($_REQUEST['action'] == "login") login();
     if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
 
-    //checks permissionsc
-
     //every action requires login, if no login sends 401 error
     if (!alreadyLogged()) die2(401, "Login required");
 
-    //if not admin, sends 403 error
-    if ($_REQUEST['action'] == "setup" || 
-        $_REQUEST['action'] == "reset")        
-        if (!isAdmin()) 
-            die2(403, "Only Admins can setup/reset database");
+    //setup/reset database
+    if ($_REQUEST['action'] == "setup") if (!isAdmin()) die2(403, "Only Admins can setup database"); else db_setup();
+    if ($_REQUEST['action'] == "reset") if (!isAdmin()) die2(403, "Only Admins can reset database"); else db_reset();
 
     //if not admin, sends 403 error
-    if ($_REQUEST['request'] == "config" || 
-        $_REQUEST['request'] == "user")
-        if (!isAdmin()) 
-            die2(403, "Only Admins can view/edit configuration or users");
-
-    //checks setup/reset action
-    if ($_REQUEST['action'] == "setup") db_setup();
-    if ($_REQUEST['action'] == "reset") db_reset();
-    
-    //checks config/user actions
-    if ($_REQUEST['request'] == "config") configRequest();
-    if ($_REQUEST['request'] == "users") usersRequest();
+    if ($_REQUEST['request'] == "config") if (!isAdmin()) die2(403, "Only Admins can view/edit configuration"); else configRequest();
+    if ($_REQUEST['request'] == "users") if (!isAdmin()) die2(403, "Only Admins can view/edit users"); else usersRequest();
 
     processDBAction(); //now processes db actions
     exit();
