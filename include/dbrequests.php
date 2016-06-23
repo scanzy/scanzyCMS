@@ -2,6 +2,9 @@
 
 //DATABASE UTILS
 
+define("SQL_FOLDER", "../sql");
+define("SQL_SETUP", "setup.sql");
+
 //class to easily manage database rows using request data
 class DBhelper
 {
@@ -255,42 +258,10 @@ function db_setup()
     //connects to database
     $conn = connect(); 
     
-    $sql = "CREATE TABLE Contents (
-                Id int,
-                Text varchar(8191),
-                TemplateId int,
-                CacheTime int(8) NOT NULL,
-                PRIMARY KEY (id),
-                FOREIGN KEY (ParentId) REFERENCES Templates(Id)
-            );
-            CREATE TABLE Substitutions (
-                SearchId int NOT NULL,
-                Macro varchar(31) NOT NULL,
-                OrderIndex int NOT NULL,
-                ReplaceId int NOT NULL,
-                FOREIGN KEY (SearchId) REFERENCES Contents(Id),
-                FOREIGN KEY (ReplaceId) REFERENCES Templates(Id)
-            );
-            CREATE TABLE Templates (
-                Id int,
-                Name varchar(31),
-                Html varchar(8191),
-                ContentId int,
-                PRIMARY KEY (id),
-                FOREIGN KEY (ContentId) REFERNCES Contents(id)
-            );
-            CREATE TABLE Files (
-                Url varchar(31) UNIQUE NOT NULL,
-                ContentId int NOT NULL,
-                FOREIGN KEY (ContentId) REFERENCES Contents(Id)
-            );
-            CREATE TABLE Macros (
-                SearchId int NOT NULL,
-                Macro varchar(31) NOT NULL,
-                ReplaceId int NOT NULL,
-                FOREIGN KEY (SearchId) REFERENCES Templates(Id),
-                FOREIGN KEY (SearchId) REFERENCES Templates(Id)
-            );";
+    //gets query
+    $sql = "";
+    try { $sql = file_get_contents(__DIR__."/".SQL_FOLDER."/".SQL_SETUP); }
+    catch(Exception $e) { die2(500, "I/O Error: ".$e->GetMessage()); }
 
     //executes query
     try { $conn->exec($sql); } 
@@ -298,7 +269,7 @@ function db_setup()
     exit();
 }   
 
-//used to check if all tables have been set up correctly
+//used to check if all tables exist
 function db_test()
 {
     //connects to database
