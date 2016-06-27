@@ -4,6 +4,7 @@
 
 define("SQL_FOLDER", "../sql");
 define("SQL_SETUP", "setup.sql");
+define("SQL_RESET", "reset.sql");
 
 //class to easily manage database rows using request data
 class DBhelper
