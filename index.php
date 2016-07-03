@@ -1,8 +1,7 @@
 <?php
-    
-require_once './modules/Shared.php'; //includes misc functions (db connection, json, etc)
-require_once './modules/Errors.php'; //includes error handling functions
-require_once './modules/CMScore.php'; //includes functions to get page content
+
+session_start();
+spl_autoload_register(function($class) { require_once "./modules/$class.php"; }); //autoload modules
 
 //sets error mode html
 Errors::setModeHtml();
@@ -11,7 +10,7 @@ Errors::setModeHtml();
 if (!isset($_GET['url'])) $_GET['url'] = "";
 
 //connects to database
-$conn = connect();
+$conn = Shared::connect();
 
 //prepares query
 $stmt = $conn->prepare("SELECT ContentId FROM Files WHERE Url=:url");

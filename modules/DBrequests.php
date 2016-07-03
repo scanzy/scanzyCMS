@@ -121,7 +121,7 @@ class DBhelper
     static function performQuery($sql, $requiredparams, $optionalparams)
     {
         //connects to database
-        $conn = connect();
+        $conn = Shared::connect();
 
         //prepares statement
         $stmt = $conn->prepare($sql);
@@ -203,7 +203,7 @@ function processDBAction($action, $request)
     switch($action)
     {
         //reads db
-        case "get": sendJSON($helper->getItems2()); break;
+        case "get": Shared::sendJSON($helper->getItems2()); break;
 
         //modifies db (updating last modified info touching file)
         case "new": $helper->newItem2(); db_modified(); break;
@@ -255,7 +255,7 @@ function sql_exec_from_file($path)
     if ($sql == FALSE) Errors::send(500, 'I/O error reading sql code from file '.$path);
 
     //connects and executes query
-    $conn = connect();     
+    $conn = Shared::connect();     
     $conn->exec($sql); 
 }
 

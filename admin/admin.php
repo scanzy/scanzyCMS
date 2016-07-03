@@ -1,8 +1,10 @@
 <?php
 
+session_start();
+spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
+
 //includes misc functions (db connection, conf loading, ecc)
 require_once '../modules/Shared.php';
-require_once '../modules/Errors.php';
 require_once '../modules/DBrequests.php';
 require_once '../modules/Users.php';
 require_once '../modules/ConfigSave.php';
@@ -54,11 +56,11 @@ if (isset($_REQUEST['action']))
 Errors::setModeHtml();
 
 //redirects to login page if no login 
-if (!alreadyLogged()) redirect("./login.html");
+if (!alreadyLogged()) Shared::redirect("./login.html");
 
 //default page
 if (!isset($_REQUEST['url'])) $_REQUEST['url'] = "";
-if ($_REQUEST['url'] == "") redirect("./dashboard");
+if ($_REQUEST['url'] == "") Shared::redirect("./dashboard");
 
 ?>
 

@@ -1,42 +1,43 @@
 <?php
 
-require_once __DIR__.'/ConfigLoad.php';
+spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
 
-//--------------------------------------------------------------------------------------------
-//CONNECTION
-
-//if not already connected, connects to database, returning the pdo object
-function connect()
+class Shared
 {
-    //returns previous connection if already connected
-    if (isset($GLOBALS['scanzycms-conn'])) return $GLOBALS['scanzycms-conn'];
+    //CONNECTION
 
-    //reads configuration from config.ini if needed
-    $conf = loadConfig();
+    //if not already connected, connects to database, returning the pdo object
+    public static function connect()
+    {
+        //returns previous connection if already connected
+        if (isset($GLOBALS['scanzycms-conn'])) return $GLOBALS['scanzycms-conn'];
 
-    //connects to database
-    $GLOBALS['scanzycms-conn'] = new PDO("mysql:". 
-        "host=".$conf['DB']['host'].(isset($conf['DB']['port']) ? $conf['DB']['port'] : "")
-        .";dbname=".$conf['DB']['name'].";charset=utf8", 
-        $conf['DB']['user'], $conf['DB']['pwd']);
+        //reads configuration from config.ini if needed
+        $conf = loadConfig();
 
-    $GLOBALS['scanzycms-conn']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        //connects to database
+        $GLOBALS['scanzycms-conn'] = new PDO("mysql:". 
+            "host=".$conf['DB']['host'].(isset($conf['DB']['port']) ? $conf['DB']['port'] : "")
+            .";dbname=".$conf['DB']['name'].";charset=utf8", 
+            $conf['DB']['user'], $conf['DB']['pwd']);
 
-    return $GLOBALS['scanzycms-conn'];      
-}
+        $GLOBALS['scanzycms-conn']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-//-----------------------------------------------------------------------------------------------
-//OUTPUT
+        return $GLOBALS['scanzycms-conn'];      
+    }
 
-//redirects to some page
-function redirect($url){ echo "<script>window.location = '".$url."'</script>"; exit(); }
+    //OUTPUT
 
-//sends json to client
-function sendJSON($obj)
-{
-    header("Content-Type: application/json");
-    echo json_encode($obj);
-    exit();
+    //redirects to some page
+    public static function redirect($url){ echo "<script>window.location = '".$url."'</script>"; exit(); }
+
+    //sends json to client
+    public static function sendJSON($obj)
+    {
+        header("Content-Type: application/json");
+        echo json_encode($obj);
+        exit();
+    }
 }
 
 ?>

@@ -1,11 +1,10 @@
 <?php
 
-require_once __DIR__.'/Errors.php';
+spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
 
-session_start();
 
-define("CONFIG_FILE", "../config/config.ini");
 
+const CONFIG_FILE = "../config/config.ini");
 
 //------------------------------------------------------------------------------------------------
 //CONFIGURATION LOAD
@@ -13,9 +12,10 @@ define("CONFIG_FILE", "../config/config.ini");
 //loads configuration in $_SESSION['scanzycms-config'] reading from config.ini
 function loadConfig()
 {
+    //gets config if needed
     if (!isset($_SESSION['scanzycms-config'])) 
     {
-        $_SESSION['scanzycms-config'] = parse_ini_file(__DIR__."/".CONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
+        $_SESSION['scanzycms-config'] = parse_ini_file(__DIR__."/".self::CONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
         if ($_SESSION['scanzycms-config'] == FALSE) Errors::send(500, "Error while parsing configuration");
     }
     return $_SESSION['scanzycms-config'];

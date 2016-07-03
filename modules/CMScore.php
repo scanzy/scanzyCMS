@@ -1,8 +1,8 @@
 <?php
 
-//MODULE CMScore (basic functions)
+spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
 
-require_once __DIR__.'/Errors.php';
+//MODULE CMScore (basic functions)
 
 class CMScore
 {
@@ -24,10 +24,13 @@ class CMScore
         //if not direct content, replaces macros in parent
         else $text = self::getContent($info['ParentId']);
 
+        //loads config 
+        $conf = loadConfig();
+
         //now performs substitutions reading content text from database (eventually using cache)
         foreach($subs as $sub) $text = str_replace(
-            $_SESSION['scanzycms-config']['Macro']['prefix'].$sub['Macro'].
-            $_SESSION['scanzycms-config']['Macro']['suffix'], self::getContent($sub['ReplaceId']), $text);
+            $conf['Macro']['prefix'].$sub['Macro'].$conf['Macro']['suffix'], 
+            self::getContent($sub['ReplaceId']), $text);
 
         //everything has been processed so it caches result
         self::setContentCache($id, $text);
@@ -38,7 +41,7 @@ class CMScore
     public static function getContentInfo($id)
     {
         //reads content info from database
-        $conn = connect();
+        $conn = Shared::connect();
         $stmt = $conn->prepare("SELECT Text, ParentId, CacheTime FROM Contents WHERE Id=:id");
         $stmt->bindParam(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -52,7 +55,7 @@ class CMScore
     //saves result in cache
     public static function setContentCache($id, $text)
     {
-        $conn = connect();
+        $conn = Shared::connect();
         $stmt = $conn->prepare("UPDATE Contents SET Text=:text, CacheTime=UNIX_TIMESTAMP(NOW()) WHERE Id=:id");
         $stmt->bindParam(":id", $id, PDO::PARAM_INT);
         $stmt->bindParam(":text", $text, PDO::PARAM_STR);
@@ -63,7 +66,7 @@ class CMScore
     public static function getSubs($contentid)
     {
         //reads content info from database
-        $conn = connect();
+        $conn = Shared::connect();
         $stmt = $conn->prepare("SELECT Macro, ReplaceId FROM Substitutions WHERE SearchId=:id ORDER BY OrderIndex ASC");
         $stmt->bindParam(":id", $contentid, PDO::PARAM_INT);
         $stmt->execute();

@@ -1,7 +1,6 @@
 <?php
 
-require_once __DIR__.'/INIcore.php';
-require_once __DIR__.'/Errors.php';
+spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
 
 //------------------------------------------------------------------------------------------------
 //CONFIGURATION SAVE
@@ -19,7 +18,7 @@ function configRequest()
     switch($_REQUEST['action'])
     {
         //send config 
-        case "get": sendJSON(loadConfig()); break;
+        case "get": Shared::sendJSON(loadConfig()); break;
 
         case "update": 
             if (write_from_request(CONFIG_FILE, //updates config
