@@ -36,9 +36,8 @@ class Database
             case "content":             
                 $helper->tablename = "Contents"; // table name
                 $helper->requiredwhereparams = array("id" => "Id"); // required where params 
-                $helper->optionalwhereparams = array("parentid" => "ParentId"); // optional where params
-                $helper->requiredparams = array("text" => "Text", "parentid" => "ParentId"); // required insert params
-                $helper->optionalparams = array("name" => "Name"); // optional insert params
+                $helper->optionalwhereparams = array("templateid" => "TemplateId"); // optional where params
+                $helper->requiredparams = array("text" => "Text", "templateid" => "TemplateId"); // required insert params
                 break; 
 
             case "substitution":
@@ -56,10 +55,11 @@ class Database
                 $helper->requiredparams = array("url" => "Url", "contentid" => "ContentId"); // required insert params
                 break; 
 
-            case "tag":            
-                $helper->tablename = "Tags"; // table name
-                $helper->requiredwhereparams = array("id" => "Id"); // required where params 
-                $helper->requiredparams = array("tag" => "Tag"); // required insert params
+             case "macro":
+                $helper->tablename = "Macros"; // table name
+                $helper->requiredwhereparams = array("searchid" => "SearchId", "macro" => "Macro"); // required where params 
+                $helper->optionalwhereparams = array("replaceid" => "ReplaceId", "index" => "OrderIndex"); // optional where params
+                $helper->requiredparams = array("searchid" => "SearchId", "macro" => "Macro", "replaceid" => "ReplaceId"); // required insert params
                 break; 
 
             default: Errors::send(500, "Unknown type"); return NULL; break;
