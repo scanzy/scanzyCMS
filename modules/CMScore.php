@@ -11,7 +11,7 @@ class CMScore
         $info = self::getContentInfo($id);
       
         //returns cached value if not modified (cache hit)
-        if (LAST_MOD > $info['CacheTime']) return $info['Text'];
+        if (Config::lastMod() > $info['CacheTime']) return $info['Text'];
 
         //reads substitution info from database
         $subs = self::getSubs($id);

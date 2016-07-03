@@ -1,5 +1,0 @@
-SELECT COUNT(*) FROM Contents;
-SELECT COUNT(*) FROM Macros;
-SELECT COUNT(*) FROM Templates;
-SELECT COUNT(*) FROM Substitutions;
-SELECT COUNT(*) FROM Files;

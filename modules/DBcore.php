@@ -110,7 +110,7 @@ class DBcore
     }
 
     //performs query binding params
-    static function performQuery($sql, $requiredparams, $optionalparams)
+    public static function performQuery($sql, $requiredparams, $optionalparams)
     {
         //connects to database
         $conn = Shared::connect();
