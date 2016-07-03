@@ -1,7 +1,6 @@
 <?php
 
-session_start();
-spl_autoload_register(function($class) { require_once "../modules/$class.php"; }); //autoload other modules
+require "../autoload.php"; //starts session and autoloads classes
 
 //includes misc functions (db connection, conf loading, ecc)
 require_once '../modules/DBrequests.php';
@@ -17,23 +16,11 @@ if (isset($_REQUEST['action']))
     //saves action
     $action = $_REQUEST['action'];
 
-    //check if login/logout action
-    if ($action == "login") Auth::login();
-    if ($action == "logout") { session_destroy(); exit(); }
-
     //every action requires login, if no login sends 401 error
-    if (!alreadyLogged()) Errors::send(401);
+    if (!Auth::isLogged()) Errors::send(401);
 
     //checks request
     $request = Params::requiredString('request');
-
-    //setup/test/reset database
-    if ($request == "db") if (!isAdmin()) Errors::send(403, "Only Admins can setup/test/reset database"); else 
-    { 
-        if ($action == "setup") db_setup();
-        if ($action == "test") db_test();
-        if ($action == "reset") db_reset();
-    }
 
     //config or users requests, if not admin, sends 403 error
     if ($request == "config") if (!isAdmin()) Errors::send(403, "Only Admins can view/edit configuration"); else configRequest();

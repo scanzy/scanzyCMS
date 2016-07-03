@@ -36,8 +36,7 @@ filestable.loadItems();
 //functions called by buttons in table
 function confirmDelFile(url) {
     showConfirm("<p><span>Do you really want to delete this file?</span> (URL '/" + url + "')</p>", function (x) {
-        if (x == true) ajax({ action: 'del', request: 'file', url: url },
-    function () { filestable.loadItems(); });
+        if (x == true) ajax("./apis/file/del.php", { url: url }, function () { filestable.loadItems(); });
     });
 }
 

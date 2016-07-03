@@ -16,7 +16,7 @@ function resetForm()
     enableOnInput(); //adds handler
     
     //loads data from server
-    return ajax({ request: "config", action: "get" }, function (data) {
+    return ajax("./apis/config/get.php", null, function (data) {
 
         //sets form
         $("#dbhost").val(data['DB']['host']);
@@ -40,7 +40,7 @@ function testConnection() {
     hideAllTooltips();
 
     //test config
-    ajax({ request: "config", action: "test",
+    ajax("./apis/config/test.php", {
         host: $("#dbhost").val(),
         name: $("#dbname").val(),
         user: $("#dbuser").val(),
@@ -66,12 +66,13 @@ function saveConfig() {
     $("#db-cancel").addClass('disabled');
 
     //saves configuration
-    ajax({ request: "config", action: "update", DB: {
-        host: $("#dbhost").val(),
-        name: $("#dbname").val(),
-        user: $("#dbuser").val(),
-        pwd: $("#dbpwd").val()
-    }        
+    ajax("./apis/config/update.php", {
+        DB: {
+            host: $("#dbhost").val(),
+            name: $("#dbname").val(),
+            user: $("#dbuser").val(),
+            pwd: $("#dbpwd").val()
+        }        
     }, function () { $("#db-save-ok").removeClass('hidden'); enableOnInput(); }) //shows result
     .fail(function () { 
 

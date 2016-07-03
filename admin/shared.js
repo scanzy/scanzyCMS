@@ -12,12 +12,12 @@ function GetParam(p) {
 function errorPopup(xhr, text, error) { showError("<strong>" + xhr.status + " " + error + ":</strong> " + xhr.responseText); }
 
 //sends ajax post request showing popup on error
-function ajax(data, callback) { 
-    return $.post("./", data, function (data) { if (callback != undefined) callback(data); }).fail(errorPopup);
+function ajax(url, data, callback) { 
+    return $.post(url, data, function (data) { if (callback != undefined) callback(data); }).fail(errorPopup);
 }
 
 //logout button
-$("#logout").click(function () { ajax({ action: 'logout' }, function () { window.location = "./login.html" }); });
+$("#logout").click(function () { ajax("./apis/auth/logout.php", null, function () { window.location = "./login.html" }); });
 
 //$("#topbarcontent").removeClass('in'); //collapses nav (if mobile mode)
 

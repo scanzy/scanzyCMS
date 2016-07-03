@@ -54,7 +54,7 @@
             $("#login").on('submit', function (e) {
                 e.preventDefault();
                 if ($("#submit").hasClass('disabled')) return false;
-                $.post("admin.php", { action: "login", username: $("#username").val(), password: $("#password").val() }, function (data) {
+                $.post("./apis/auth/login.php", { username: $("#username").val(), password: $("#password").val() }, function (data) {
                     if (data == "true") window.location.href = "./"; //redirects on success
                     else { $("#wrongpassword").removeClass('hidden'); shake($("#login")); } //shakes error
                 });

@@ -1,11 +1,6 @@
 <?php
 
-//DATABASE UTILS
-
-define("SQL_FOLDER", "../sql");
-define("SQL_SETUP", "setup.sql");
-define("SQL_RESET", "reset.sql");
-define("SQL_TEST", "test.sql");
+//MODULE DBcore (used to easily manage data)
 
 //class to easily manage database rows using request data
 class DBhelper
@@ -244,38 +239,6 @@ function processDBAction($action, $request)
         //error
         default: Errors::send(400, "Unknown action"); break;
     }
-}
-
-//used to execute sql code in file
-function sql_exec_from_file($path)
-{
-    $sql = file_get_contents($path); //gets sql handling IO errors
-    if ($sql == FALSE) Errors::send(500, 'I/O error reading sql code from file '.$path);
-
-    //connects and executes query
-    $conn = Shared::connect();     
-    $conn->exec($sql); 
-}
-
-//used to create database tables and procedures
-function db_setup()
-{
-    sql_exec_from_file(__DIR__."/".SQL_FOLDER."/".SQL_SETUP); 
-    exit();
-} 
-
-//used to erase database tables and procedures
-function db_reset()
-{
-    sql_exec_from_file(__DIR__."/".SQL_FOLDER."/".SQL_RESET); 
-    exit();
-}   
-
-//used to check if all tables exist
-function db_test()
-{
-    sql_exec_from_file(__DIR__."/".SQL_FOLDER."/".SQL_TEST);
-    exit();
 }
 
 ?>
