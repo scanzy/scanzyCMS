@@ -89,10 +89,11 @@ if ($url == "") Shared::redirect("./dashboard");
             <div class="box title"><h1>Settings</h1></div>
             
             <div class="row noselect">
-                <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
+                <div class="col-lg-4 col-lg-offset-2 col-sm-6">
                     <form id="db-conn" class="box" role="form" autocomplete="off">
-                        <h3 class="title" style="color: #aaa">Database connection</h3>
-                        <div class="line"></div>                    
+                        <h3 class="title-grey">Database connection</h3>
+                        <div class="line"></div> 
+                                           
                         <div class="form-group">
                             <label for="host">Host:</label>
                             <input type="text" class="form-control" id="dbhost">
@@ -108,7 +109,8 @@ if ($url == "") Shared::redirect("./dashboard");
                         <div class="form-group">
                             <label for="password">Password:</label>
                             <input type="password" class="form-control" id="dbpwd" autocomplete="off">
-                        </div>                       
+                        </div>       
+                                        
                         <div id="db-msgs" class="progress">
                             <div id="db-load-error" class="progress-bar progress-bar-danger fill hidden">
                                 <span>Error while reading configuration</span>
@@ -119,6 +121,7 @@ if ($url == "") Shared::redirect("./dashboard");
                             <div id="db-save-error" class="progress-bar progress-bar-danger fill hidden"><span>Error while saving new configuration</span></div>
                             <div id="db-save-ok" class="progress-bar progress-bar-success fill hidden"><span>New configuration saved</span></div>                   
                         </div>
+
                         <div class="right">
                             <button id="db-test" class="btn btn-info left db-test">Test connection</button>
                             <button id="db-testing" class="btn btn-info left disabled hidden">Testing...</button>
@@ -128,6 +131,33 @@ if ($url == "") Shared::redirect("./dashboard");
                             <button id="db-cancel" class="btn btn-default disabled">Cancel</button>    
                         </div>             
                     </form>
+                </div>
+
+                <div class="col-lg-4 col-sm-6">
+                    <div class="box">
+                        <h3 class="title-grey">Database initialization</h3>
+                        <div class="line"></div>
+
+                        <div id="db-msgs2" class="progress">
+                            <div id="db-setting-up" class="progress-bar progress-bar-info progress-bar-striped active fill hidden"><span>Setting database up...</span></div>
+                            <div id="db-testing2" class="progress-bar progress-bar-info progress-bar-striped active fill hidden"><span>Testing database...</span></div>
+                            <div id="db-resetting" class="progress-bar progress-bar-info progress-bar-striped active fill hidden"><span>Resetting database...</span></div>                 
+                            <div id="db-setup-ok" class="progress-bar progress-bar-success fill hidden"><span>Database set up successfully</span></div>
+                            <div id="db-test2-ok" class="progress-bar progress-bar-success fill hidden"><span>Database test OK</span></div>
+                            <div id="db-reset-ok" class="progress-bar progress-bar-success fill hidden"><span>Database resetted successfully</span></div>
+                            <div id="db-setup-error" class="progress-bar progress-bar-danger fill hidden"><span>Error during setup</span></div>
+                            <div id="db-test2-error" class="progress-bar progress-bar-danger fill hidden"><span>Database test error</span></div>
+                            <div id="db-reset-error" class="progress-bar progress-bar-danger fill hidden"><span>Error during reset</span></div>
+                        </div>   
+
+                        <div class="right">
+                            <button id="db-setup" class="btn db-button btn-success">Setup database</button>
+                            <button id="db-test2" class="btn db-button left btn-info">Test database</button> 
+                        </div>
+
+                        <div class="line"></div>
+                        <button id="db-reset" class="btn btn-block db-button btn-danger">Reset database</button>  
+                    </div>
                 </div>
             </div>
         </div>

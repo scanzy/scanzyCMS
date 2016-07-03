@@ -2,7 +2,7 @@
 //database connection settings form
 
 //clears messages
-function clearMsgs() { $("#db-msgs > div").addClass('hidden'); }
+function clearDBMsgs() { $("#db-msgs > div").addClass('hidden'); }
 
 //form reset
 function resetForm()
@@ -29,8 +29,9 @@ function resetForm()
     .always(function () { $("#db-load").addClass('hidden'); }); //hides loading info
 }
 
-//shows testing info
+//test connection
 function testConnection() {
+    //shows testing info
     $("#db-test").addClass('hidden');
     $("#db-test-ok").addClass('hidden');
     $("#db-test-error").addClass('hidden');
@@ -40,7 +41,7 @@ function testConnection() {
     hideAllTooltips();
 
     //test config
-    ajax("./apis/config/test.php", {
+    return ajax("./apis/config/test.php", {
         host: $("#dbhost").val(),
         name: $("#dbname").val(),
         user: $("#dbuser").val(),
@@ -96,7 +97,7 @@ function enableOnInput() {
     //adds handler 
     $("#db-conn input").on('input', function() {
 
-        clearMsgs();
+        clearDBMsgs();
 
         //enables buttons
         $("#db-save").removeClass('disabled');
@@ -111,6 +112,7 @@ function enableOnInput() {
         $("#db-conn input").off('input'); //removes this handler
     })
 }
+
 //disables save password dialog
 $("#db-conn").submit(function(e) { e.preventDefault(); return false; })
 
@@ -127,7 +129,7 @@ $("#db-cancel").click(function (e) {
     e.preventDefault();
     if ($(this).hasClass('disabled')) return false;
 
-    clearMsgs();
+    clearDBMsgs();
     resetForm(); 
     return false;
 });
@@ -140,5 +142,85 @@ $(".db-test").click(function (e) {
     return false;
 });
 
-//inits data and tests conn
-resetForm().success(testConnection);
+//database setup reset form
+
+//clears messages
+function clearDBMsgs2() { $("#db-msgs2 > div").addClass('hidden'); }
+
+//setups database
+function setupDatabase()
+{
+    clearDBMsgs2(); //shows setting up info
+    $("#db-setting-up").removeClass('hidden');
+    $(".db-button").addClass('disabled');
+
+    //sends request and shows result
+    return ajax("./apis/db/setup.php", null, function() { $("#db-setup-ok").removeClass('hidden'); })
+    .always(function() { 
+        $(".db-button").removeClass('disabled');
+        $("#db-setting-up").addClass('hidden');
+    })
+    .fail(function() { shake($("#db-setup-error").removeClass('hidden')); })
+}
+
+//resets database
+function resetDatabase()
+{
+    clearDBMsgs2(); //shows resetting info
+    $("#db-resetting").removeClass('hidden');
+    $(".db-button").addClass('disabled');
+
+    //sends request and shows result
+    return ajax("./apis/db/reset.php", null, function() { $("#db-reset-ok").removeClass('hidden'); })
+    .always(function() { 
+        $(".db-button").removeClass('disabled');
+        $("#db-resetting").addClass('hidden'); 
+    })
+    .fail(function() { shake($("#db-reset-error").removeClass('hidden')); })
+}
+
+//tests database
+function testDatabase()
+{
+    clearDBMsgs2(); //shows testing info
+    $("#db-testing2").removeClass('hidden');
+    $(".db-button").addClass('disabled');
+
+    //sends request and shows result
+    return ajax("./apis/db/test.php", null, function() { $("#db-test2-ok").removeClass('hidden'); })
+    .always(function() { 
+        $(".db-button").removeClass('disabled'); 
+        $("#db-testing2").addClass('hidden');
+    })
+    .fail(function() { shake($("#db-test2-error").removeClass('hidden')); })
+}
+
+//buttons callbacks
+$("#db-setup").click(function(e) {
+    e.preventDefault();
+    if ($(this).hasClass('disabled')) return false;
+
+    setupDatabase();
+    return false;
+});
+
+$("#db-test2").click(function(e) {
+    e.preventDefault();
+    if ($(this).hasClass('disabled')) return false;
+
+    testDatabase();
+    return false;
+});
+
+$("#db-reset").click(function(e) {
+    e.preventDefault();
+    if ($(this).hasClass('disabled')) return false;
+
+    showConfirm("<p>Are you sure to reset database? This would ERASE ALL DATA</p>", function(x){
+        if (x == true) resetDatabase();
+    });
+    return false;
+});
+
+//inits data and tests conn and test db
+resetForm().success(testConnection.success(testDatabase));

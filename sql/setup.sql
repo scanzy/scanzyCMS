@@ -4,15 +4,15 @@ CREATE TABLE IF NOT EXISTS Contents (
     Id int,
     Text varchar(8191) NOT NULL DEFAULT '',
     TemplateId int DEFAULT NULL,
-    CacheTime int(8) NOT NULL,
+    CacheTime int(8) NOT NULL DEFAULT 0,
     PRIMARY KEY (Id)    
 );
 
 CREATE TABLE IF NOT EXISTS Templates (
     Id int,
     Name varchar(31) UNIQUE NOT NULL,
-    Html varchar(8191) NOT NULL DEFAULT '',
-    ContentId int,
+    Html varchar(8191) DEFAULT '',
+    ContentId int DEFAULT NULL,
     PRIMARY KEY (Id),
     FOREIGN KEY (ContentId) REFERENCES Contents(Id)
 );
@@ -71,6 +71,10 @@ BEGIN
         IF ((SELECT CacheTime FROM Contents WHERE Contents.Id = id) < lastmod) THEN
 
             SELECT Html From Templates WHERE Templates.Id = tempId INTO output; -- gets html        
+
+            IF output IS NULL THEN -- if hybrid template gets template html (recursively) from parent content
+                CALL getContents(output, (SELECT ContentId From Templates WHERE Templates.Id = tempId), prefix, suffix, lastmod);
+            END IF;
 
             SELECT COUNT(*) FROM Substitutions WHERE SearchId = id INTO n; -- counts macros
 
