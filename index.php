@@ -4,7 +4,7 @@
 require_once './include/shared.php';
 
 //sets error mode html
-setErrMode(ERR_MODE_HTML);
+setErrModeHtml();
 
 //reads the url of file to process
 if (!isset($_GET['url'])) $_GET['url'] = "";
@@ -12,25 +12,19 @@ if (!isset($_GET['url'])) $_GET['url'] = "";
 //connects to database
 $conn = connect();
 
-try 
-{
-    //prepares query
-    $stmt = $conn->prepare("SELECT ContentId FROM Files WHERE Url=:url");
-    $stmt->bindParam(":url", $_GET['url'], PDO::PARAM_STR);
+//prepares query
+$stmt = $conn->prepare("SELECT ContentId FROM Files WHERE Url=:url");
+$stmt->bindParam(":url", $_GET['url'], PDO::PARAM_STR);
 
-    //executes query getting data in associative array 
-    $stmt->execute();
-    $result = $stmt->fetch(PDO::FETCH_ASSOC); 
+//executes query getting data in associative array 
+$stmt->execute();
+$result = $stmt->fetch(PDO::FETCH_ASSOC); 
 
-    //displays 404 page (not found)
-    if ($result == FALSE) die2(404);
+//displays 404 page (not found)
+if ($result == FALSE) error404page();
 
-    //gets content and sends it
-    echo getContent($result['ContentId']);
-
-} //catches errors displaying error page
-catch(PDOException $e) { die2(500, $e->getMessage()); }
-
+//gets content and sends it
+echo getContent($result['ContentId']);
 exit();
 
 //gets content text
@@ -71,7 +65,7 @@ function getContentInfo($id)
     $stmt->execute();
 
     $result = $stmt->fetch(PDO::FETCH_ASSOC); //checks empty result
-    if (empty($result)) die2(404, "Not found content with id ".$id);
+    if (empty($result)) errorSend(404, "Not found content with id ".$id);
 
     return $result;
 }

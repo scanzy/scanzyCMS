@@ -12,7 +12,7 @@ function login()
 {
     //check parameters
     if (!isset($_POST['username']) || !isset($_POST['password']))
-        die2(400, "Required username and password params");
+        errorSend(400, "Required username and password params");
         
     $users = loadUsers(); //loads users data
 
@@ -55,7 +55,7 @@ function loadUsers()
 {
     $_SESSION['scanzycms-users'] = parse_ini_file(USERS_FILE, TRUE); //gets data
     if ($_SESSION['scanzycms-users'] == FALSE) 
-        die2(500, "Error while parsing users data");
+        errorSend(500, "Error while parsing users data");
     return $_SESSION['scanzycms-users'];
 }
 
@@ -63,7 +63,7 @@ function loadUsers()
 function saveUsers()
 {
     if(write_ini_file(USERS_FILE, $_SESSION['scanzycms-users'], TRUE) == FALSE)
-        die2("Error while saving users data");
+        errorSend("Error while saving users data");
 }
 
 //called to process requests about users
@@ -74,7 +74,7 @@ function usersRequest()
         case "add": break;
         case "edit": break;
         case "remove": break;
-        default: die2(400, "Unknown action"); break;
+        default: errorSend(400, "Unknown action"); break;
     }
 }
 

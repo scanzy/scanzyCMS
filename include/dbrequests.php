@@ -5,14 +5,11 @@
 define("SQL_FOLDER", "../sql");
 define("SQL_SETUP", "setup.sql");
 define("SQL_RESET", "reset.sql");
+define("SQL_TEST", "test.sql");
 
 //class to easily manage database rows using request data
 class DBhelper
 {
-    //error callbacks
-    public static $paramserrorcallback;
-    public static $dberrorcallback;
-
     public $tablename = "";
     public $requiredwhereparams = array();
     public $optionalwhereparams = array();
@@ -29,7 +26,7 @@ class DBhelper
     public static function newItem($tablename, $requiredparams, $optionalparams)
     {
         //checks parameters
-        if (self::checkParams($requiredparams, $paramserrorcallback) == FALSE) return FALSE;
+        if (self::checkParams($requiredparams) == FALSE) return FALSE;
 
         //builds sql
         $cols = $vals = "(";
@@ -49,7 +46,7 @@ class DBhelper
     {
         //checks parameters
         if (self::checkParams($requiredwhereparams) == FALSE) return FALSE;
-        if (count($optionalparams) == 0) { self::$paramserrorcallback("No modification specified"); return FALSE; } //if no params
+        if (count($optionalparams) == 0) { errorSend(400, "No modification specified"); return FALSE; } //if no params
 
         //builds sql
         $sql = "UPDATE FROM ".$tablename." SET  ";
@@ -94,7 +91,7 @@ class DBhelper
     {
         foreach($params as $p => $c) //for each param
             if (!isset($_REQUEST[$p])) //if is not set
-            { self::$errorcallback("Missing required parameter '".$p."'"); return FALSE; } //error
+            { errorSend(400, "Missing required parameter '".$p."'"); return FALSE; } //error
         return TRUE;
     }
 
@@ -121,25 +118,22 @@ class DBhelper
     //performs query binding params
     static function performQuery($sql, $requiredparams, $optionalparams)
     {
-        try { //connects to database
-            $conn = connect();
+        //connects to database
+        $conn = connect();
 
-            //prepares statement
-            $stmt = $conn->prepare($sql);
+        //prepares statement
+        $stmt = $conn->prepare($sql);
 
-            //lists bindparams
-            $bindparams = array();
-            foreach($requiredparams as $p => $c) $bindparams[$c] = $_REQUEST[$p];
-            foreach($optionalparams as $p => $c) if (isset($_REQUEST[$p])) $bindparams[$c] = $_REQUEST[$p];
+        //lists bindparams
+        $bindparams = array();
+        foreach($requiredparams as $p => $c) $bindparams[$c] = $_REQUEST[$p];
+        foreach($optionalparams as $p => $c) if (isset($_REQUEST[$p])) $bindparams[$c] = $_REQUEST[$p];
 
-            //binds params
-            foreach($bindparams as $c => $val) $stmt->bindParam(":".strtolower($c), $val);
+        //binds params
+        foreach($bindparams as $c => $val) $stmt->bindParam(":".strtolower($c), $val);
             
-            $stmt->execute(); //executes query 
-            return (substr($sql, 0, 6) == "SELECT") ? $stmt->fetchAll(PDO::FETCH_ASSOC) : $stmt->rowCount(); //and returns result
-
-        } //handles pdo errors
-        catch(PDOException $e) { self::$dberrorcallback($e->GetMessage()); return FALSE; }
+        $stmt->execute(); //executes query 
+        return (substr($sql, 0, 6) == "SELECT") ? $stmt->fetchAll(PDO::FETCH_ASSOC) : $stmt->rowCount(); //and returns result
     }
 }
 
@@ -192,23 +186,19 @@ function getHelper($type)
             $helper->requiredparams = array("tagid" => "TagId", "contentid" => "ContentId", "macro" => "Macro"); // required insert params
             break; 
 
-        default: DBhelper::$paramserrorcallback("Unknown request"); return NULL; break;
+        default: errorSend(400, "Unknown request"); return NULL; break;
     }
     return $helper;
 }
 
 //recognizes right DB action and executes it
-function processDBAction()
+function processDBAction($action, $request)
 {
-    //sets helper callbacks
-    DBhelper::$dberrorcallback = function($msg) { die2(500, $msg); };
-    DBhelper::$paramserrorcallback = function($msg) { die2(400, $msg); };
-
     //gets helper object
-    $helper = getHelper($_REQUEST['request']);
+    $helper = getHelper($request);
     
     //selects action type
-    switch($_REQUEST['action'])
+    switch($action)
     {
         //reads db
         case "get": sendJSON($helper->getItems2()); break;
@@ -221,94 +211,70 @@ function processDBAction()
         case "del": $helper->delItem2(); db_modified();
 
             //deletes related items
-            switch($_REQUEST['request'])
+            switch($request)
             {
                 case "content": 
                     
                     //deletes files with that content id
-                    DBhelper::delItem("Files", array("id" => "ContentId"), array(), $paramserrorcallback, $dberrorcallback);
+                    DBhelper::delItem("Files", array("id" => "ContentId"), array());
 
                     //deletes substitutions for that content and of that content
-                    DBhelper::delItem("Substitutions", array("id" => "SearchId"), array(), $paramserrorcallback, $dberrorcallback);
-                    DBhelper::delItem("Substitutions", array("id" => "ReplaceId"), array(), $paramserrorcallback, $dberrorcallback);
+                    DBhelper::delItem("Substitutions", array("id" => "SearchId"), array());
+                    DBhelper::delItem("Substitutions", array("id" => "ReplaceId"), array());
 
                     //deletes contenttags and macrotags
-                    DBhelper::delItem("ContentTags", array("id" => "ContentId"), array(), $paramserrorcallback, $dberrorcallback);
-                    DBhelper::delItem("MacroTags", array("id" => "ContentId"), array(), $paramserrorcallback, $dberrorcallback);
+                    DBhelper::delItem("ContentTags", array("id" => "ContentId"), array());
+                    DBhelper::delItem("MacroTags", array("id" => "ContentId"), array());
 
                     break;
 
                 case "tag": 
                     
                     //deletes contenttags and macrotags
-                    DBhelper::delItem("ContentTags", array("id" => "TagId"), array(), $paramserrorcallback, $dberrorcallback);
-                    DBhelper::delItem("MacroTags", array("id" => "TagId"), array(), $paramserrorcallback, $dberrorcallback);
+                    DBhelper::delItem("ContentTags", array("id" => "TagId"), array());
+                    DBhelper::delItem("MacroTags", array("id" => "TagId"), array());
                     
                     break;
+
+                //error
+                default: errorSend(400, "Unknown request"); break;
             }
             break;
         
         //error
-        default: die2(400, "Unknown action"); break;
+        default: errorSend(400, "Unknown action"); break;
     }
 }
 
-//used to create database tables
+//used to execute sql code in file
+function sql_exec_from_file($path)
+{
+    $sql = file_get_contents($path); //gets sql handling IO errors
+    if ($sql == FALSE) errorSend(500, 'I/O error reading sql code from file '.$path);
+
+    //connects and executes query
+    $conn = connect();     
+    $conn->exec($sql); 
+}
+
+//used to create database tables and procedures
 function db_setup()
 {
-    //connects to database
-    $conn = connect(); 
-    
-    //gets query
-    $sql = "";
-    try { $sql = file_get_contents(__DIR__."/".SQL_FOLDER."/".SQL_SETUP); }
-    catch(Exception $e) { die2(500, "I/O Error: ".$e->GetMessage()); }
+    sql_exec_from_file(__DIR__."/".SQL_FOLDER."/".SQL_SETUP); 
+    exit();
+} 
 
-    //executes query
-    try { $conn->exec($sql); } 
-    catch(PDOException $e) { die2(500, "SQL error: ".$e->getMessage()); }
+//used to erase database tables and procedures
+function db_reset()
+{
+    sql_exec_from_file(__DIR__."/".SQL_FOLDER."/".SQL_RESET); 
     exit();
 }   
 
 //used to check if all tables exist
 function db_test()
 {
-    //connects to database
-    $conn = connect(); 
-
-    //gets data from tables
-    $errors = array();
-    $tables = array("Contents", "Substitutions", "Files", "Templates", "Macros");
-    
-    //executes queries
-    foreach($tables as $t)        
-        try { $conn->exec("SELECT * FROM TABLE ".$t); } //gets data table 
-        catch(PDOException $e) { $errors[] = $e; } //adds error
-
-    if (count($errors) > 0) //sends errors if any
-        die2(500, count($errors)." of ".count($tables)." table(s) NOT found, they might not exist");
-
-    exit();
-}
-
-//used to delete database tables
-function db_reset()
-{
-    //connects to database
-    $conn = connect(); 
-
-    //deletes tables
-    $errors = array();
-    $tables = array("Contents", "Substitutions", "Files", "Templates", "Macros");
-    
-    //executes queries
-    foreach($tables as $t)        
-        try { $conn->exec("DROP TABLE ".$t); } //deletes table 
-        catch(PDOException $e) { $errors[] = $e; } //adds error
-
-    if (count($errors) > 0) //sends errors if any
-        die2(500, count($errors)." of ".count($tables)." table(s) NOT deleted, they might not exist");
-
+    sql_exec_from_file(__DIR__."/".SQL_FOLDER."/".SQL_TEST);
     exit();
 }
 

@@ -12,29 +12,35 @@ require_once '../include/configsave.php';
 //if ajax request (perform action)
 if (isset($_REQUEST['action']))
 {
-    //sets error handler
-    setErrMode(ERR_MODE_AJAX);
+    //saves action
+    $action = $_REQUEST['action'];
 
     //check if login/logout action
-    if ($_REQUEST['action'] == "login") login();
-    if ($_REQUEST['action'] == "logout") { session_destroy(); exit(); }
+    if ($action == "login") login();
+    if ($action == "logout") { session_destroy(); exit(); }
 
     //every action requires login, if no login sends 401 error
-    if (!alreadyLogged()) die2(401, "Login required");
+    if (!alreadyLogged()) errorSend(401);
+
+    //checks request
+    if (!isset($_REQUEST['request'])) errorSend(400, "Use parameter 'request'");
+
+    //saves request
+    $request = $_REQUEST['request'];
 
     //setup/test/reset database
-    if ($_REQUEST['request'] == "db") if (!isAdmin()) die2(403, "Only Admins can setup/test/reset database"); else 
+    if ($_REQUEST['request'] == "db") if (!isAdmin()) errorSend(403, "Only Admins can setup/test/reset database"); else 
     { 
-        if ($_REQUEST['action'] == "setup") db_setup();
-        if ($_REQUEST['action'] == "test") db_test();
-        if ($_REQUEST['action'] == "reset") db_reset();
+        if ($action == "setup") db_setup();
+        if ($action == "test") db_test();
+        if ($action == "reset") db_reset();
     }
 
     //config or users requests, if not admin, sends 403 error
-    if ($_REQUEST['request'] == "config") if (!isAdmin()) die2(403, "Only Admins can view/edit configuration"); else configRequest();
-    if ($_REQUEST['request'] == "users") if (!isAdmin()) die2(403, "Only Admins can view/edit users"); else usersRequest();
+    if ($request == "config") if (!isAdmin()) errorSend(403, "Only Admins can view/edit configuration"); else configRequest();
+    if ($request == "users") if (!isAdmin()) errorSend(403, "Only Admins can view/edit users"); else usersRequest();
 
-    processDBAction(); //now processes db actions
+    processDBAction($action, $request); //now processes db actions
     exit();
 }
 
@@ -42,7 +48,7 @@ if (isset($_REQUEST['action']))
 //HTML MODE
 
 //sets error handler
-setErrMode(ERR_MODE_HTML);
+setErrModeHtml();
 
 //redirects to login page if no login 
 if (!alreadyLogged()) redirect("./login.html");
