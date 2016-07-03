@@ -2,37 +2,6 @@
 
 require "../autoload.php"; //starts session and autoloads classes
 
-//includes misc functions (db connection, conf loading, ecc)
-require_once '../modules/DBrequests.php';
-
-//-------------------------------------------------------------------------------------------
-//AJAX MODE
-
-//if ajax request (perform action)
-if (isset($_REQUEST['action']))
-{
-    Errors::setModeAjax();
-
-    //saves action
-    $action = $_REQUEST['action'];
-
-    //every action requires login, if no login sends 401 error
-    if (!Auth::isLogged()) Errors::send(401);
-
-    //checks request
-    $request = Params::requiredString('request');
-
-    //config or users requests, if not admin, sends 403 error
-    if ($request == "config") if (!isAdmin()) Errors::send(403, "Only Admins can view/edit configuration"); else configRequest();
-    if ($request == "users") if (!isAdmin()) Errors::send(403, "Only Admins can view/edit users"); else usersRequest();
-
-    processDBAction($action, $request); //now processes db actions
-    exit();
-}
-
-//----------------------------------------------------------------------------------------------
-//HTML MODE
-
 //sets error handler
 Errors::setModeHtml();
 

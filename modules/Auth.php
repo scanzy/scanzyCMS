@@ -57,7 +57,7 @@ class Auth
         if (self::isLogged()) 
         {
             $code = 403; //sends 403 if no required level
-            if ($level <= $_SESSION['userlevel']) return;             
+            if ($level >= $_SESSION['userlevel']) return;             
         }
         Errors::send($code, "Required user level $level (".array_search($level, self::$userlevels).")"); 
     }

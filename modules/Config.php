@@ -4,12 +4,12 @@
 
 class Config
 {
-    const CONFIG_FILE = "../config/config.ini";
+    const CONFIG_FILE = __DIR__."/../config/config.ini";
 
     //loads configuration in $_SESSION['scanzycms-config'] reading from config.ini
     public static function load()
     {
-        $_SESSION['scanzycms-config'] = parse_ini_file(__DIR__."/".self::CONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
+        $_SESSION['scanzycms-config'] = parse_ini_file(self::CONFIG_FILE, TRUE, INI_SCANNER_TYPED); //gets data
         if ($_SESSION['scanzycms-config'] == FALSE) 
         {
             unset($_SESSION['scanzycms-config']); //ON ERROR
@@ -21,7 +21,7 @@ class Config
     public static function get()
     {
         //loads config if needed
-        if (!isset($_SESSION['scanzycms-config'])) load();
+        if (!isset($_SESSION['scanzycms-config'])) self::load();
         return $_SESSION['scanzycms-config'];
     }
 
@@ -33,42 +33,30 @@ class Config
     }
 
     //used to store last db modification time
-    public static function lastMod() { filemtime(__DIR__.'/'.self::CONFIG_FILE); }
+    public static function lastMod() { filemtime(self::CONFIG_FILE); }
 
     //called to touch config file (so we know last modification)
-    public static function touch() { touch(__DIR__.'/'.self::CONFIG_FILE); }
+    public static function touch() { touch(self::CONFIG_FILE); }
 
-    //called to process requests about config
-    public static function configRequest()
+    //updates config using request params
+    public static function update()
     {
-        switch($_REQUEST['action'])
-        {
-            //send config 
-            case "get": Shared::sendJSON(Config::get()); break;
+        if (INIcore::write_from_request(self::CONFIG_FILE, //updates config
+            array('DB' => array('host', 'name', 'user', 'pwd'), array('Macro' => array('prefix', 'suffix'))),
+            self::get(), TRUE) == FALSE) 
+                Errors::send(500, "Error while saving configuration"); //if error
 
-            case "update": 
-                if (INIcore::write_from_request(CONFIG_FILE, //updates config
-                    array('DB' => array('host', 'name', 'user', 'pwd'), array('Macro' => array('prefix', 'suffix'))),
-                    self::get(), TRUE) == FALSE) 
-                        Errors::send(500, "Error while saving configuration"); //if error
+        self::load(); //reloads saved data
+    }
 
-                load(); //reloads saved data
-                break;
-
-            case "test": 
-
-                // host test here
-                if (filter_var(gethostbyname($_REQUEST['host']), FILTER_VALIDATE_IP) === FALSE) Errors::send(400, "Invalid host");
+    //test config
+    public static function test($host, $name, $user, $pwd)
+    {
+        // host test here
+        if (filter_var(gethostbyname($host), FILTER_VALIDATE_IP) === FALSE) Errors::send(400, "Invalid host '$host'");
                 
-                //tests db connection config
-                $c = new PDO("mysql:host=".$_REQUEST['host'].";dbname=".
-                    $_REQUEST['name'], $_REQUEST['user'], $_REQUEST['pwd']);
-         
-                break;
-
-            default: Errors::send(400, "Unknown action"); break;
-        }
-        exit();
+        //tests db connection config
+        $c = new PDO("mysql:host=$host;dbname=$name", $user, $pwd);
     }
 }
 ?>

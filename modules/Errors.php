@@ -54,18 +54,23 @@ class Errors
     
     //error handler
     public static function errorHandlerAjax($code, $msg, $file, $line)
-    { self::send(500, "ERROR $code in file '$file' at line $line: $msg", TRUE); }
+    { 
+        error_log("ERROR $code in file '$file' at line $line: $msg");
+        self::send(500, $msg);
+    }
  
     //exception handler
     public static function exceptionHandlerAjax($ex)
-    { self::send(500, "EXCEPTION ".$ex->GetCode()." in file '".$ex->GetFile()."' at line ".$ex->GetLine().": ".$ex->GetMessage(), TRUE); } 
+    { 
+        error_log("EXCEPTION ".$ex->GetCode()." in file '".$ex->GetFile()."' at line ".$ex->GetLine().": ".$ex->GetMessage());
+        self::send(500, $ex->GetMessage());
+    } 
 
     //ajax mode
     public static function send($code, $msg = "", $showmsg = FALSE)
     { 
         self::sendHeader($code);
-        if ($showmsg == TRUE) echo $msg; //shows message if configured
-        if ($msg != "") error_log($msg); //logs error if message specified
+        if ($msg != "") echo $msg; //shows message if any
         die();
     }    
 

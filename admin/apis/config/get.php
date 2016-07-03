@@ -2,8 +2,8 @@
 
 require_once "../../../autoload.php";
 
-//API db/setup (setups database tables and procedures)
+//API config/get (gets configuration)
 
 Errors::setModeAjax();
 Auth::requireLevel(Auth::ADMIN);
-Database::setup();
+Shared::sendJSON(Config::get());

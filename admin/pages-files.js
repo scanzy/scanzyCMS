@@ -7,7 +7,7 @@ filestable = $("#files-list").scanzytable({
         "ContentId": "File content",
         "Buttons": ""
     },
-    request: { url: "./", method: "GET", data: { request: "file", action: "get" }, error: errorPopup,
+    request: { url: "./apis/file/get.php", method: "GET", data: null, error: errorPopup,
         done: function () { translate(document.getElementById("files-list")); }
     },
     fetch: {
