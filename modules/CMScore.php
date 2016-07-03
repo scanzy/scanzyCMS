@@ -1,8 +1,6 @@
 <?php
 
-spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
-
-//MODULE CMScore (basic functions)
+//MODULE CMScore (basic cms functions)
 
 class CMScore
 {

@@ -1,6 +1,6 @@
 <?php
 
-spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
+//MODULE Shared (connection and output functions)
 
 class Shared
 {

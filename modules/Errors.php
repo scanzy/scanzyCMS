@@ -1,6 +1,6 @@
 <?php
     
-//ERROR HANDLING MODULE
+//MODULE Errors (errors and exceptions handling)
 
 class Errors
 {
@@ -54,15 +54,11 @@ class Errors
     
     //error handler
     public static function errorHandlerAjax($code, $msg, $file, $line)
-    {
-        self::send(500, "ERROR $code in file '$file' at line $line: $msg", TRUE); //send and logs error
-    }
+    { self::send(500, "ERROR $code in file '$file' at line $line: $msg", TRUE); }
  
     //exception handler
     public static function exceptionHandlerAjax($ex)
-    {
-        self::send(500, "EXCEPTION ".$ex->GetCode()." in file '".$ex->GetFile()."' at line ".$ex->GetLine().": ".$ex->GetMessage(), TRUE); //send and logs exception
-    }  
+    { self::send(500, "EXCEPTION ".$ex->GetCode()." in file '".$ex->GetFile()."' at line ".$ex->GetLine().": ".$ex->GetMessage(), TRUE); } 
 
     //ajax mode
     public static function send($code, $msg = "", $showmsg = FALSE)
@@ -83,7 +79,7 @@ class Errors
         set_exception_handler("Errors::exceptionHandlerAjax"); //exceptions
     }
 
-    //-------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
     //GLOBAL
 
     //sends error header
@@ -97,7 +93,8 @@ class Errors
             500 => "Internal Server Error"
         );
 
-        header($_SERVER['SERVER_PROTOCOL']." ".$code." ".$codenames[$code], TRUE, $code); //sends header with error code
+        //sends header with error code
+        header($_SERVER['SERVER_PROTOCOL']." ".$code." ".$codenames[$code], TRUE, $code); 
     }   
 }
  ?>
