@@ -7,14 +7,14 @@ spl_autoload_register(function($class) { require_once "./modules/$class.php"; })
 Errors::setModeHtml();
 
 //reads the url of file to process
-if (!isset($_GET['url'])) $_GET['url'] = "";
+$url = Params::optionalString('url', "");
 
 //connects to database
 $conn = Shared::connect();
 
 //prepares query
 $stmt = $conn->prepare("SELECT ContentId FROM Files WHERE Url=:url");
-$stmt->bindParam(":url", $_GET['url'], PDO::PARAM_STR);
+$stmt->bindParam(":url", $url, PDO::PARAM_STR);
 
 //executes query getting data in associative array 
 $stmt->execute();

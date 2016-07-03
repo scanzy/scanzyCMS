@@ -13,7 +13,7 @@ class Shared
         if (isset($GLOBALS['scanzycms-conn'])) return $GLOBALS['scanzycms-conn'];
 
         //reads configuration from config.ini if needed
-        $conf = loadConfig();
+        $conf = Config::get();
 
         //connects to database
         $GLOBALS['scanzycms-conn'] = new PDO("mysql:". 

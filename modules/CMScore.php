@@ -23,7 +23,7 @@ class CMScore
         else $text = self::getContent($info['ParentId']);
 
         //loads config 
-        $conf = loadConfig();
+        $conf = Config::get();
 
         //now performs substitutions reading content text from database (eventually using cache)
         foreach($subs as $sub) $text = str_replace(

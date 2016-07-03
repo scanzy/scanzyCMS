@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__.'/Errors.php';
-
 //DATABASE UTILS
 
 define("SQL_FOLDER", "../sql");

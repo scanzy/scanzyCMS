@@ -8,22 +8,22 @@ class Auth
     public static function login() 
     {
         //check parameters
-        if (!isset($_POST['username']) || !isset($_POST['password']))
-            Errors::send(400, "Required username and password POST params");
+        $username = Params::requiredString('username');
+        $password = Params::requiredString('password');
         
-        $users = Users::loadUsers(); //loads users data
+        $users = Users::load(); //loads users data
 
         //checks if finds user
         foreach($users as $type => $usergroup)
             
             //check if user exists
-            if(isset($usergroup[$_POST['username']])) 
+            if(isset($usergroup[$username])) 
 
                 //checks password
-                if ($usergroup[$_POST['username']] == $_POST['password']) 
+                if ($usergroup[$username] == $password) 
                 {
                     //saves username and usertype
-                    $_SESSION['username'] = $_POST['username'];
+                    $_SESSION['username'] = $username;
                     $_SESSION['usergroup'] = $type;
 
                     echo "true"; //success!

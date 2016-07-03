@@ -18,7 +18,7 @@ class Users
     //writes configuration in $_SESSION['scanzycms-users'] to users.ini file
     public static function saveUsers()
     {
-        if(write_ini_file(self::USERS_FILE, $_SESSION['scanzycms-users'], TRUE) == FALSE)
+        if(INIcore::write_ini_file(self::USERS_FILE, $_SESSION['scanzycms-users'], TRUE) == FALSE)
             Errors::send("Error while saving users data");
     }
 

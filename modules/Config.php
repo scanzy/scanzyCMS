@@ -4,7 +4,7 @@
 
 class Config
 {
-    const CONFIG_FILE = "../config/config.ini");
+    const CONFIG_FILE = "../config/config.ini";
 
     //loads configuration in $_SESSION['scanzycms-config'] reading from config.ini
     public static function load()
@@ -44,7 +44,7 @@ class Config
         switch($_REQUEST['action'])
         {
             //send config 
-            case "get": Shared::sendJSON(loadConfig()); break;
+            case "get": Shared::sendJSON(Config::get()); break;
 
             case "update": 
                 if (INIcore::write_from_request(CONFIG_FILE, //updates config

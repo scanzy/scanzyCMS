@@ -1,13 +1,10 @@
 <?php
 
 session_start();
-spl_autoload_register(function($class) { require_once __DIR__."/$class.php"; }); //autoload other modules
+spl_autoload_register(function($class) { require_once "../modules/$class.php"; }); //autoload other modules
 
 //includes misc functions (db connection, conf loading, ecc)
-require_once '../modules/Shared.php';
 require_once '../modules/DBrequests.php';
-require_once '../modules/Users.php';
-require_once '../modules/ConfigSave.php';
 
 //-------------------------------------------------------------------------------------------
 //AJAX MODE
@@ -21,20 +18,17 @@ if (isset($_REQUEST['action']))
     $action = $_REQUEST['action'];
 
     //check if login/logout action
-    if ($action == "login") login();
+    if ($action == "login") Auth::login();
     if ($action == "logout") { session_destroy(); exit(); }
 
     //every action requires login, if no login sends 401 error
     if (!alreadyLogged()) Errors::send(401);
 
     //checks request
-    if (!isset($_REQUEST['request'])) Errors::send(400, "Use parameter 'request'");
-
-    //saves request
-    $request = $_REQUEST['request'];
+    $request = Params::requiredString('request');
 
     //setup/test/reset database
-    if ($_REQUEST['request'] == "db") if (!isAdmin()) Errors::send(403, "Only Admins can setup/test/reset database"); else 
+    if ($request == "db") if (!isAdmin()) Errors::send(403, "Only Admins can setup/test/reset database"); else 
     { 
         if ($action == "setup") db_setup();
         if ($action == "test") db_test();
@@ -56,11 +50,11 @@ if (isset($_REQUEST['action']))
 Errors::setModeHtml();
 
 //redirects to login page if no login 
-if (!alreadyLogged()) Shared::redirect("./login.html");
+if (!Auth::isLogged()) Shared::redirect("./login.html");
 
 //default page
-if (!isset($_REQUEST['url'])) $_REQUEST['url'] = "";
-if ($_REQUEST['url'] == "") Shared::redirect("./dashboard");
+$url = Params::optionalString('url', "");
+if ($url == "") Shared::redirect("./dashboard");
 
 ?>
 
@@ -110,7 +104,7 @@ if ($_REQUEST['url'] == "") Shared::redirect("./dashboard");
             </div>
         </div>
 
-        <?php switch ($_REQUEST['url']) { case "dashboard": ?>
+        <?php switch ($url) { case "dashboard": ?>
         <div class="container page">
             <div class="box title"><h1>Dashboard</h1></div>
 
@@ -193,6 +187,6 @@ if ($_REQUEST['url'] == "") Shared::redirect("./dashboard");
         <script src="scanzytable.js"></script>
         <script src="shared.js"></script>
         
-        <script src="pages-<?php echo $_REQUEST['url']; ?>.js"></script>
+        <script src="pages-<?php echo $url; ?>.js"></script>
     </body>
 </html>
