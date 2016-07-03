@@ -5,7 +5,7 @@ require_once './modules/Errors.php'; //includes error handling functions
 require_once './modules/CMScore.php'; //includes functions to get page content
 
 //sets error mode html
-setErrModeHtml();
+Errors::setModeHtml();
 
 //reads the url of file to process
 if (!isset($_GET['url'])) $_GET['url'] = "";
@@ -22,8 +22,8 @@ $stmt->execute();
 $result = $stmt->fetch(PDO::FETCH_ASSOC); 
 
 //displays 404 page (not found)
-if ($result == FALSE) error404page();
+if ($result == FALSE) Errors::page404();
 
 //gets content and sends it
-echo getContent($result['ContentId']);
+echo CMScore::getContent($result['ContentId']);
 exit();

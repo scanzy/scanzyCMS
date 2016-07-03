@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__.'/INIcore.php';
+require_once __DIR__.'/Errors.php';
 
 define("USERS_FILE", "../config/users.ini");
 
@@ -12,7 +13,7 @@ function login()
 {
     //check parameters
     if (!isset($_POST['username']) || !isset($_POST['password']))
-        errorSend(400, "Required username and password params");
+        Errors::send(400, "Required username and password params");
         
     $users = loadUsers(); //loads users data
 
@@ -55,7 +56,7 @@ function loadUsers()
 {
     $_SESSION['scanzycms-users'] = parse_ini_file(USERS_FILE, TRUE); //gets data
     if ($_SESSION['scanzycms-users'] == FALSE) 
-        errorSend(500, "Error while parsing users data");
+        Errors::send(500, "Error while parsing users data");
     return $_SESSION['scanzycms-users'];
 }
 
@@ -63,7 +64,7 @@ function loadUsers()
 function saveUsers()
 {
     if(write_ini_file(USERS_FILE, $_SESSION['scanzycms-users'], TRUE) == FALSE)
-        errorSend("Error while saving users data");
+        Errors::send("Error while saving users data");
 }
 
 //called to process requests about users
@@ -74,7 +75,7 @@ function usersRequest()
         case "add": break;
         case "edit": break;
         case "remove": break;
-        default: errorSend(400, "Unknown action"); break;
+        default: Errors::send(400, "Unknown action"); break;
     }
 }
 

@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__.'/Errors.php';
+
 //DATABASE UTILS
 
 define("SQL_FOLDER", "../sql");
@@ -46,7 +48,7 @@ class DBhelper
     {
         //checks parameters
         if (self::checkParams($requiredwhereparams) == FALSE) return FALSE;
-        if (count($optionalparams) == 0) { errorSend(400, "No modification specified"); return FALSE; } //if no params
+        if (count($optionalparams) == 0) { Errors::send(400, "No modification specified"); return FALSE; } //if no params
 
         //builds sql
         $sql = "UPDATE FROM ".$tablename." SET  ";
@@ -91,7 +93,7 @@ class DBhelper
     {
         foreach($params as $p => $c) //for each param
             if (!isset($_REQUEST[$p])) //if is not set
-            { errorSend(400, "Missing required parameter '".$p."'"); return FALSE; } //error
+            { Errors::send(400, "Missing required parameter '".$p."'"); return FALSE; } //error
         return TRUE;
     }
 
@@ -186,7 +188,7 @@ function getHelper($type)
             $helper->requiredparams = array("tagid" => "TagId", "contentid" => "ContentId", "macro" => "Macro"); // required insert params
             break; 
 
-        default: errorSend(400, "Unknown request"); return NULL; break;
+        default: Errors::send(400, "Unknown request"); return NULL; break;
     }
     return $helper;
 }
@@ -237,12 +239,12 @@ function processDBAction($action, $request)
                     break;
 
                 //error
-                default: errorSend(400, "Unknown request"); break;
+                default: Errors::send(400, "Unknown request"); break;
             }
             break;
         
         //error
-        default: errorSend(400, "Unknown action"); break;
+        default: Errors::send(400, "Unknown action"); break;
     }
 }
 
@@ -250,7 +252,7 @@ function processDBAction($action, $request)
 function sql_exec_from_file($path)
 {
     $sql = file_get_contents($path); //gets sql handling IO errors
-    if ($sql == FALSE) errorSend(500, 'I/O error reading sql code from file '.$path);
+    if ($sql == FALSE) Errors::send(500, 'I/O error reading sql code from file '.$path);
 
     //connects and executes query
     $conn = connect();     
