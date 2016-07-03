@@ -1,4 +1,6 @@
-﻿CREATE TABLE IF NOT EXISTS Contents (
+-- tables setup
+
+CREATE TABLE IF NOT EXISTS Contents (
     Id int,
     Text varchar(8191) NOT NULL DEFAULT '',
     TemplateId int NOT NULL,
@@ -40,6 +42,8 @@ CREATE TABLE IF NOT EXISTS Macros (
 
 ALTER TABLE Contents ADD CONSTRAINT 
 FOREIGN KEY (TemplateId) REFERENCES Templates(Id);
+
+-- procedures setup
 
 DROP PROCEDURE IF EXISTS getContents;
 CREATE PROCEDURE getContents(
