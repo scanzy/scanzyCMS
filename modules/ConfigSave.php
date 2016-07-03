@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/iniwritecore.php';
+require_once __DIR__.'/INIcore.php';
 
 //------------------------------------------------------------------------------------------------
 //CONFIGURATION SAVE

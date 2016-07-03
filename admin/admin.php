@@ -1,10 +1,10 @@
 <?php
 
 //includes misc functions (db connection, conf loading, ecc)
-require_once '../include/shared.php';
-require_once '../include/dbrequests.php';
-require_once '../include/users.php';
-require_once '../include/configsave.php';
+require_once '../modules/Shared.php';
+require_once '../modules/DBrequests.php';
+require_once '../modules/Users.php';
+require_once '../modules/ConfigSave.php';
 
 //-------------------------------------------------------------------------------------------
 //AJAX MODE
