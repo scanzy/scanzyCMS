@@ -45,3 +45,5 @@ button.left, span.left { float: left; }
 
 .nav li a.active { background-color:#eaeaea; }
 .nav li a:hover { background-color:#6bf; color:#fff; }
+
+.CodeMirror { border: 1px solid #ccc; border-radius: 4px; }

@@ -1,7 +1,7 @@
 //inits templates table
 templatestable = $("#templates-list").scanzytable({
     search_placeholder: "Search templates...",
-    new_text: "New template", new_click: function () { showError("Not implemented "); },
+    new_text: "New template", new_click: function () { window.location.href = "./newtemplate"; },
     columns_names: {
         "Name": "Template name",
         "ContentId": "Derived from",

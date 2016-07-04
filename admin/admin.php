@@ -20,14 +20,23 @@ if ($url == "") Shared::redirect("./dashboard");
         <meta charset="utf-8" />
         <title>scanzyCMS - Admin</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
         <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="libs/codemirror.css" />
+        <script src="libs/codemirror.js"></script>
+
         <link rel="stylesheet" type="text/css" href="bootstrap-ex.css" />
         <link rel="stylesheet" type="text/css" href="style.css" />
-        <script src="translate.js"></script>
-        <script src="shake.js"></script>       
+
+        <script src="libs/translate.js"></script>
+        <script src="libs/shake.js"></script>       
     </head>
     <body>
 
@@ -73,15 +82,51 @@ if ($url == "") Shared::redirect("./dashboard");
         <?php break; case "files": ?>
         <div class="container page">
             <div class="box title"><h1>Files</h1></div>
-
             <div class="box"><div id="files-list"></div></div>
         </div>
 
         <?php break; case "templates": ?>
         <div class="container page">
             <div class="box title"><h1>Templates</h1></div>
-
             <div class="box"><div id="templates-list"></div></div>
+        </div>
+
+        <?php break; case "newtemplate": ?>
+        <div class="container page">
+            <div class="box title"><h1>New Template</h1></div>
+
+            <div id="template-new" class="box">               
+                <div class="row">                      
+                    <div class="col-sm-6 form-group">
+                        <label for="template-name">Template name:</label>
+                        <input id="template-name" type="text" class="form-control input-md" />
+                    </div>
+                    <div class="col-sm-6 form-group">
+                        <label for="template-parent">Template parent:</label>
+                        <select id="template-parent" class="selectpicker" data-width="100%">
+                            <option value="null">-None-</option>
+                            <option value="0">0</option>
+                        </select> 
+                    </div>                    
+                </div>
+                
+                <div id="template-simple"> 
+                    <div class="form-group">
+                        <label for="template-html">Template HTML:</label>
+                        <textarea id="template-html" class="form-control vresize" rows="15"></textarea>
+                    </div>
+                </div>
+
+                <div id="template-derived" class="hidden">
+
+                </div> 
+
+                <div class="line"></div>
+                <div class="right">
+                    <button id="template-cancel" class="btn btn-lg btn-default">Cancel</button>
+                    <button id="template-save" class="btn btn-lg btn-success">Save</button>
+                </div>
+            </div>
         </div>
 
         <?php break; case "settings": ?>
@@ -95,19 +140,19 @@ if ($url == "") Shared::redirect("./dashboard");
                         <div class="line"></div> 
                                            
                         <div class="form-group">
-                            <label for="host">Host:</label>
+                            <label for="dbhost">Host:</label>
                             <input type="text" class="form-control" id="dbhost">
                         </div>
                         <div class="form-group">
-                            <label for="name">Database name:</label>
+                            <label for="dbname">Database name:</label>
                             <input type="text" class="form-control" id="dbname">
                         </div>
                         <div class="form-group">
-                            <label for="username">Username:</label>
+                            <label for="dbuser">Username:</label>
                             <input type="text" class="form-control" id="dbuser">
                         </div>
                         <div class="form-group">
-                            <label for="password">Password:</label>
+                            <label for="dbpwd">Password:</label>
                             <input type="password" class="form-control" id="dbpwd" autocomplete="off">
                         </div>       
                                         
@@ -168,9 +213,9 @@ if ($url == "") Shared::redirect("./dashboard");
             <span>Powered by <b>ScanzySoftware</b></span>
         </div>  
 
-        <script src="messages.js"></script>
-        <script src="confirm.js"></script>
-        <script src="scanzytable.js"></script>
+        <script src="libs/messages.js"></script>
+        <script src="libs/confirm.js"></script>
+        <script src="libs/scanzytable.js"></script>
         <script src="shared.js"></script>
         
         <script src="pages-<?php echo $url; ?>.js"></script>

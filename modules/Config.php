@@ -11,7 +11,7 @@ class Config extends INIhelper
     protected static $proto = array('DB' => array('host', 'name', 'user', 'pwd'), array('Macro' => array('prefix', 'suffix')));
 
     //used to store last db modification time
-    public static function lastMod() { filemtime(self::$INI_FILE); }
+    public static function lastMod() { return filemtime(self::$INI_FILE); }
 
     //called to touch config file (so we know last modification)
     public static function touch() { touch(self::$INI_FILE); }

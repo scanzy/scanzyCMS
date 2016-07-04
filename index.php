@@ -16,10 +16,10 @@ $conn = Shared::connect();
 
 //prepares query
 $stmt = $conn->prepare("CALL getFileContents(:url, :prefix, :suffix, :lastmod);");
-$stmt->bindParam(":url", $url, PDO::PARAM_STR);
-$stmt->bindParam(":prefix", $conf['Macro']['prefix'], PDO::PARAM_STR);
-$stmt->bindParam(":suffix", $conf['Macro']['suffix'], PDO::PARAM_STR);
-$stmt->bindParam(":lastmod", Config::lastMod(), PDO::PARAM_INT);
+$stmt->bindValue(":url", $url, PDO::PARAM_STR);
+$stmt->bindValue(":prefix", $conf['Macro']['prefix'], PDO::PARAM_STR);
+$stmt->bindValue(":suffix", $conf['Macro']['suffix'], PDO::PARAM_STR);
+$stmt->bindValue(":lastmod", Config::lastMod(), PDO::PARAM_INT);
 
 //executes query getting data in associative array 
 $stmt->execute();

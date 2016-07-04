@@ -23,8 +23,8 @@ class Auth
         $username = Params::requiredString('username');
         $password = Params::requiredString('password');
         
-        $users = Users::load(); //loads users data
-
+        $users = Users::get(); //gets users data
+        
         //checks if finds user
         foreach($users as $type => $usergroup)
             
