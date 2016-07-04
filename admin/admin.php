@@ -81,7 +81,7 @@ if ($url == "") Shared::redirect("./dashboard");
         <div class="container page">
             <div class="box title"><h1>Templates</h1></div>
 
-            <div class="box"><div id="contents-list"></div></div>
+            <div class="box"><div id="templates-list"></div></div>
         </div>
 
         <?php break; case "settings": ?>
