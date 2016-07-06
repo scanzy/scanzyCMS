@@ -29,8 +29,18 @@ if ($url == "") Shared::redirect("./dashboard");
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="libs/codemirror.css" />
-        <script src="libs/codemirror.js"></script>
+    <?php if (in_array($url, array('newtemplate'))) { ?>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/codemirror.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/addon/edit/closebrackets.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/addon/edit/closetag.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/addon/edit/matchtags.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/addon/fold/xml-fold.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/mode/css/css.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/mode/htmlmixed/htmlmixed.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/mode/javascript/javascript.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.16.0/mode/xml/xml.min.js"></script>
+    <?php } ?>        
 
         <link rel="stylesheet" type="text/css" href="bootstrap-ex.css" />
         <link rel="stylesheet" type="text/css" href="style.css" />
@@ -83,6 +93,35 @@ if ($url == "") Shared::redirect("./dashboard");
         <div class="container page">
             <div class="box title"><h1>Files</h1></div>
             <div class="box"><div id="files-list"></div></div>
+        </div>
+
+        <?php break; case "newfile": ?>
+        <div class="container page">
+            <div class="box title"><h1>New File</h1></div>
+
+            <div id="file-new" class="box">               
+                <div class="row">                      
+                    <div class="col-sm-6 form-group">
+                        <label for="file-url">File URL:</label>
+                        <input id="file-url" type="text" class="form-control input-md" />
+                    </div>
+                    <div class="col-sm-6 form-group">
+                        <label for="file-template">Template:</label>
+                        <select id="file-template" class="selectpicker" data-width="100%">
+                            <option value="null">-Select a template-</option>
+                            <option value="0">Template0</option>
+                        </select> 
+                    </div>                    
+                </div>
+                
+                
+
+                <div class="line"></div>
+                <div class="right">
+                    <button id="file-cancel" class="btn btn-lg btn-default">Cancel</button>
+                    <button id="file-save" class="btn btn-lg btn-success">Save</button>
+                </div>
+            </div>
         </div>
 
         <?php break; case "templates": ?>
@@ -215,6 +254,7 @@ if ($url == "") Shared::redirect("./dashboard");
 
         <script src="libs/messages.js"></script>
         <script src="libs/confirm.js"></script>
+        <script src="libs/scanzyload.js"></script>
         <script src="libs/scanzytable.js"></script>
         <script src="shared.js"></script>
         

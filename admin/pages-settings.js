@@ -223,4 +223,4 @@ $("#db-reset").click(function(e) {
 });
 
 //inits data and tests conn and test db
-resetForm().success(testConnection.success(testDatabase));
+resetForm().success(function() { testConnection().success(testDatabase); });

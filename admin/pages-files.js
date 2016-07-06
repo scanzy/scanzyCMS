@@ -1,19 +1,19 @@
 //inits files table
 filestable = $("#files-list").scanzytable({
-    search_placeholder: "Search files...",
-    new_text: "New file", new_click: function () { showError("Not implemented "); },
-    columns_names: {
+    search: { show: true, text: "Search files..." },
+    button: { show: true, text: "New file", click: function () { window.location.href = "./newfile"; } },
+    columns: {
         "Url": "File path (URL)",
         "ContentId": "File content",
         "Buttons": ""
     },
     request: { url: "./apis/file/get.php", method: "GET", data: null, error: errorPopup,
-        done: function () { translate(document.getElementById("files-list")); }
+        complete: function () { translate(document.getElementById("files-list")); }
     },
     fetch: {
         content: {
-            'Url': function (url) { return '<a href="../' + url + '" target="_blank">/' + url + '</a>'; },
-            'Buttons': function (x, data) {
+            'Url': function (x, url) { return '<a href="../' + url + '" target="_blank">/' + url + '</a>'; },
+            'Buttons': function (x, y, z, data) {
                 return '\
                     <button type="button" class="btn btn-xs btn-success" onclick="window.open(\'../' + data['Url'] + '\');">\
                         <span class="glyphicon glyphicon-eye-open"></span> <span>View</span>\
@@ -26,7 +26,7 @@ filestable = $("#files-list").scanzytable({
                     </button>';
             }
         },
-        cell: { start: function (col) { return (col == "Buttons") ? "<td class='right'>" : "<td>"; } }
+        cell: { "Buttons": { start: function () { return "<td class='right'>"; }, end: function() { return "</td>";} } }
     }
 });
 

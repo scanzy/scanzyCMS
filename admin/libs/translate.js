@@ -12,7 +12,7 @@ function translate(element) { if (langdata != undefined) translatenow((element !
 
 function translatenow(element) {    
     //translates text
-    var e = element.querySelectorAll("span, a, h1, h2, h3, h4, h5, th, p, label, button");
+    var e = element.querySelectorAll("span, a, h1, h2, h3, h4, h5, th, p, label, button, option");
     for (var i = 0; i < e.length; i++) if (e[i].innerHTML in langdata) e[i].innerHTML = langdata[e[i].innerHTML];
 
     //translates attributes

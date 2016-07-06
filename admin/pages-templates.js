@@ -1,19 +1,19 @@
 //inits templates table
 templatestable = $("#templates-list").scanzytable({
-    search_placeholder: "Search templates...",
-    new_text: "New template", new_click: function () { window.location.href = "./newtemplate"; },
-    columns_names: {
+    search: { show: true, text: "Search templates..." },
+    button: { show: true, text: "New template", click: function () { window.location.href = "./newtemplate"; } },
+    columns: {
         "Name": "Template name",
         "ContentId": "Derived from",
         "Buttons": ""
     },
     request: { url: "./apis/template/get.php", method: "GET", data: null, error: errorPopup,
-        done: function () { translate(document.getElementById("templates-list")); }
+        complete: function () { translate(document.getElementById("templates-list")); }
     },
     fetch: {
         content: {
-            'Url': function (url) { return '<a href="../' + url + '" target="_blank">/' + url + '</a>'; },
-            'Buttons': function (x, data) {
+            'Url': function (x, url) { return '<a href="../' + url + '" target="_blank">/' + url + '</a>'; },
+            'Buttons': function (x, y, z, data) {
                 return '\
                     <button type="button" class="btn btn-xs btn-warning" onclick="editTemplate(' + data['Id'] + ');">\
                         <span class="glyphicon glyphicon-edit"></span> <span>Edit</span>\
@@ -23,7 +23,7 @@ templatestable = $("#templates-list").scanzytable({
                     </button>';
             }
         },
-        cell: { start: function (col) { return (col == "Buttons") ? "<td class='right'>" : "<td>"; } }
+        cell: { "Buttons": { start: function () { return "<td class='right'>"; } } }
     }
 });
 
